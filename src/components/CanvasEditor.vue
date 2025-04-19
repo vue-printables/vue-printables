@@ -7,22 +7,21 @@
       alt="product-image"
       :src="imageUrl"
     />
-    <canvas ref="canvasRef" />
+    <canvas
+      ref="mainCanvas"
+      :style="{
+        width: size.width + 'px',
+        height: size.height + 'px',
+      }"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
-import { Canvas, Rect, FabricImage } from "fabric";
+import { onMounted, onUnmounted, shallowRef, useTemplateRef } from "vue";
+import { Canvas, Rect } from "fabric";
 import imageUrl from "~/assets/t-shirt.jpg";
-
-const canvasRef = ref<HTMLCanvasElement | null>(null);
-let mainCanvas: Canvas | null = null;
-
-type Size = {
-  width: number;
-  height: number;
-};
+import type { Size } from "~/types/common";
 
 const props = withDefaults(
   defineProps<{
@@ -41,11 +40,13 @@ const props = withDefaults(
   },
 );
 
-// Initialize the canvas as the printable area
+const canvasInstance = shallowRef<Canvas | null>(null);
+const mainCanvasRef = useTemplateRef("mainCanvas");
+
 onMounted(async () => {
-  if (canvasRef.value) {
+  if (mainCanvasRef.value) {
     // Create a "design area" rect that visually indicates the printable region
-    const designAreaRect = new Rect({
+    const printableArea = new Rect({
       ...props.printableAreaSize,
       strokeWidth: 3,
       strokeUniform: true,
@@ -55,7 +56,7 @@ onMounted(async () => {
       borderScaleFactor: 2,
       selectable: true,
       hasControls: true,
-      cornerSize: 24,
+      cornerSize: 10,
       cornerCursor: "pointer",
       cornerStrokeColor: "#0066cc",
       cornerColor: "#99ccff",
@@ -69,34 +70,14 @@ onMounted(async () => {
       },
     });
 
-    const mainClipPath = (await designAreaRect.clone()).set({
-      width: designAreaRect.width + 30,
-      height: designAreaRect.height + 30,
+    const mainClipPath = await printableArea.clone();
+
+    mainClipPath.set({
+      width: printableArea.width + 30,
+      height: printableArea.height + 30,
     });
 
-    designAreaRect.on("scaling", async () => {
-      mainClipPath.set({
-        width: designAreaRect.width + 30,
-        height: designAreaRect.height + 30,
-        left: designAreaRect.left - 15,
-        top: designAreaRect.top - 15,
-        scaleX: designAreaRect.scaleX,
-        scaleY: designAreaRect.scaleY,
-      });
-    });
-
-    designAreaRect.on("moving", async () => {
-      mainClipPath.set({
-        width: designAreaRect.width + 30,
-        height: designAreaRect.height + 30,
-        left: designAreaRect.left - 15,
-        top: designAreaRect.top - 15,
-        scaleX: designAreaRect.scaleX,
-        scaleY: designAreaRect.scaleY,
-      });
-    });
-
-    mainCanvas = new Canvas(canvasRef.value, {
+    canvasInstance.value = new Canvas(mainCanvasRef.value, {
       ...props.size,
       backgroundColor: "transparent",
       selection: true,
@@ -106,17 +87,47 @@ onMounted(async () => {
       clipPath: mainClipPath,
     });
 
-    mainCanvas.add(designAreaRect);
-    mainCanvas.centerObject(designAreaRect);
-    mainCanvas.centerObject(mainClipPath);
+    printableArea.on("scaling", async () => {
+      mainClipPath.set({
+        width: printableArea.width + 30,
+        height: printableArea.height + 30,
+        left: printableArea.left - 15,
+        top: printableArea.top - 15,
+        scaleX: printableArea.scaleX,
+        scaleY: printableArea.scaleY,
+      });
+    });
+
+    printableArea.on("moving", async () => {
+      mainClipPath.set({
+        width: printableArea.width + 30,
+        height: printableArea.height + 30,
+        left: printableArea.left - 15,
+        top: printableArea.top - 15,
+        scaleX: printableArea.scaleX,
+        scaleY: printableArea.scaleY,
+      });
+    });
+
+    canvasInstance.value.add(printableArea);
+    canvasInstance.value.centerObject(printableArea);
+    canvasInstance.value.centerObject(mainClipPath);
+  } else {
+    throw new Error(
+      `Couldn't get canvas element with id:${mainCanvasRef.value}`,
+    );
   }
 });
 
 onUnmounted(async () => {
-  if (mainCanvas) {
-    await mainCanvas.dispose();
-    mainCanvas = null;
+  if (canvasInstance.value) {
+    await canvasInstance.value.dispose();
+    canvasInstance.value = null;
   }
+});
+
+defineExpose({
+  canvasInstance,
 });
 </script>
 
