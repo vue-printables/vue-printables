@@ -7,8 +7,8 @@
       </p>
     </header>
 
-    <main class="flex justify-between gap-5">
-      <div class="toolbar grow rounded bg-gray-100 p-4">
+    <main class="flex justify-center gap-5">
+      <div class="toolbar max-w-[590px] grow rounded bg-gray-100 p-4">
         <div class="flex p-2">
           <button
             class="mr-2 px-4 py-2"
@@ -34,28 +34,29 @@
 
         <!-- Tab Content -->
         <div v-show="activeTab === 'image'" class="tab-panel">
-          <ImageUploader :onImageUploaded="handleImageUploaded" />
+          <ImageUploader @image-uploaded="addImage" />
         </div>
         <div v-show="activeTab === 'text'" class="tab-panel">
-          <TextEditor :onTextAdded="handleTextAdded" />
+          <TextEditor @text-added="addText" />
         </div>
       </div>
-      <CanvasEditor />
+
+      <CanvasEditor ref="canvasEditor" />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, useTemplateRef } from "vue";
 import CanvasEditor from "~/components/CanvasEditor.vue";
 import ImageUploader from "~/components/ImageUploader.vue";
-import TextEditor, { type TextConfig } from "~/components/TextEditor.vue";
+import TextEditor from "~/components/Editor.vue";
+import useText from "~/composables/useText";
+import useImage from "~/composables/useImage";
 
 const activeTab = ref<"image" | "text">("image");
+const canvasRef = useTemplateRef("canvasEditor");
 
-// Handle image upload
-const handleImageUploaded = (imgElement: HTMLImageElement) => {};
-
-// Handle text addition
-const handleTextAdded = (textConfig: TextConfig) => {};
+const { addText } = useText(canvasRef);
+const { addImage } = useImage(canvasRef);
 </script>
