@@ -1,14 +1,17 @@
 <template>
-  <div class="text-editor-container">
+  <div class="w-full">
     <div class="mb-4 rounded border p-3">
       <label class="mb-2 block text-sm font-medium text-gray-700">
         Enter Text
       </label>
       <textarea
-        v-model="textContent"
-        class="h-20 w-full rounded border p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        class="form-input h-20"
+        :value="values.text"
         placeholder="Enter your text here..."
-      ></textarea>
+        @input="
+          updateConfig('text', ($event.target as HTMLInputElement)?.value)
+        "
+      />
     </div>
 
     <div class="formatting-controls mb-4 grid grid-cols-2 gap-3">
@@ -16,8 +19,14 @@
       <div>
         <label class="mb-1 block text-sm font-medium text-gray-700">Font</label>
         <select
-          v-model="fontFamily"
-          class="w-full rounded border p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          class="form-input"
+          :value="values.fontFamily"
+          @change="
+            updateConfig(
+              'fontFamily',
+              ($event.target as HTMLInputElement)?.value,
+            )
+          "
         >
           <option v-for="font in fontOptions" :key="font" :value="font">
             {{ font }}
@@ -29,72 +38,58 @@
       <div>
         <label class="mb-1 block text-sm font-medium text-gray-700">Size</label>
         <input
-          v-model.number="fontSize"
+          class="form-input"
           type="number"
           min="10"
           max="72"
-          class="w-full rounded border p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          :value="values.fontSize"
+          @input="
+            updateConfig(
+              'fontSize',
+              parseInt(($event.target as HTMLInputElement)?.value) || 16,
+            )
+          "
         />
       </div>
 
       <!-- Style Controls -->
       <div class="col-span-2 flex space-x-2">
         <button
-          @click="isBold = !isBold"
           class="rounded border px-3 py-1"
-          :class="{ 'bg-gray-200': isBold }"
           title="Bold"
+          :class="{ 'bg-gray-200': values.fontWeight === 'bold' }"
+          @click="toggleBold"
         >
           <span class="font-bold">B</span>
         </button>
+
         <button
-          @click="isItalic = !isItalic"
           class="rounded border px-3 py-1"
-          :class="{ 'bg-gray-200': isItalic }"
           title="Italic"
+          :class="{ 'bg-gray-200': values.fontStyle === 'italic' }"
+          @click="toggleItalic"
         >
           <span class="italic">I</span>
         </button>
+
         <button
-          @click="isUnderlined = !isUnderlined"
           class="rounded border px-3 py-1"
-          :class="{ 'bg-gray-200': isUnderlined }"
           title="Underline"
+          :class="{ 'bg-gray-200': values.underline }"
+          @click="updateConfig('underline', !values.underline)"
         >
           <span class="underline">U</span>
         </button>
-        <input
-          v-model="textColor"
-          type="color"
-          class="h-8 w-10 border-0"
-          title="Text Color"
-        />
 
-        <!-- Text Alignment -->
-        <button
-          @click="textAlign = 'left'"
-          class="rounded border px-3 py-1"
-          :class="{ 'bg-gray-200': textAlign === 'left' }"
-          title="Align Left"
-        >
-          ←
-        </button>
-        <button
-          @click="textAlign = 'center'"
-          class="rounded border px-3 py-1"
-          :class="{ 'bg-gray-200': textAlign === 'center' }"
-          title="Align Center"
-        >
-          ↔
-        </button>
-        <button
-          @click="textAlign = 'right'"
-          class="rounded border px-3 py-1"
-          :class="{ 'bg-gray-200': textAlign === 'right' }"
-          title="Align Right"
-        >
-          →
-        </button>
+        <input
+          class="m-0 h-10 w-10 rounded border"
+          type="color"
+          title="Text Color"
+          :value="values.fill"
+          @input="
+            updateConfig('fill', ($event.target as HTMLInputElement)?.value)
+          "
+        />
       </div>
     </div>
 
@@ -102,14 +97,15 @@
     <div class="mb-4 min-h-[60px] rounded border bg-white p-3">
       <p class="mb-1 text-sm text-gray-500">Preview:</p>
       <div :style="textPreviewStyle" class="break-words">
-        {{ textContent || "Your text will appear here" }}
+        {{ values.text || "Your text will appear here" }}
       </div>
     </div>
 
     <!-- Add Text Button -->
     <button
-      @click="addText"
+      v-if="!editing"
       class="w-full rounded bg-green-500 px-4 py-2 text-white transition hover:bg-green-600"
+      @click="addText"
     >
       Add Text to Canvas
     </button>
@@ -117,36 +113,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import type { TextConfigs } from "~/types/common";
+import { computed } from "vue";
 
-const props = defineProps<{
-  onTextAdded: (textConfig: TextConfig) => void;
+const emit = defineEmits<{
+  update: [field: string, value: any];
+  addText: [];
 }>();
 
-export interface TextConfig {
-  text: string;
-  fontFamily: string;
-  fontSize: number;
-  fontWeight: string;
-  fontStyle: string;
-  underline: boolean;
-  textAlign: string;
-  fill: string;
-}
+const props = defineProps<{
+  values: TextConfigs;
+  editing?: boolean;
+}>();
 
-// Text content
-const textContent = ref("");
-
-// Font settings
-const fontFamily = ref("Arial");
-const fontSize = ref(24);
-const isBold = ref(false);
-const isItalic = ref(false);
-const isUnderlined = ref(false);
-const textAlign = ref("left");
-const textColor = ref("#000000");
-
-// Available font options
 const fontOptions = [
   "Arial",
   "Times New Roman",
@@ -156,46 +135,57 @@ const fontOptions = [
   "Helvetica",
 ];
 
-// Create formatted text object
+const textPreviewStyle = computed(() => {
+  return {
+    fontFamily: props.values.fontFamily,
+    fontSize: `${props.values.fontSize}px`,
+    fontWeight: props.values.fontWeight,
+    fontStyle: props.values.fontStyle,
+    textDecoration: props.values.underline ? "underline" : "none",
+    color: props.values.fill,
+    // Only add stroke if it's set
+    ...(props.values.stroke
+      ? {
+          WebkitTextStroke: `1px ${props.values.stroke}`,
+          textStroke: `1px ${props.values.stroke}`,
+        }
+      : {}),
+  };
+});
+
+const updateConfig = (field: string, value: any) => {
+  emit("update", field, value);
+};
+
+const toggleBold = () => {
+  const newWeight = props.values.fontWeight === "bold" ? "normal" : "bold";
+  updateConfig("fontWeight", newWeight);
+};
+
+const toggleItalic = () => {
+  const newStyle = props.values.fontStyle === "italic" ? "normal" : "italic";
+  updateConfig("fontStyle", newStyle);
+};
+
 const addText = () => {
-  if (!textContent.value.trim()) {
+  if (!props.values.text.trim()) {
     alert("Please enter some text");
     return;
   }
-
-  const textConfig: TextConfig = {
-    text: textContent.value,
-    fontFamily: fontFamily.value,
-    fontSize: fontSize.value,
-    fontWeight: isBold.value ? "bold" : "normal",
-    fontStyle: isItalic.value ? "italic" : "normal",
-    underline: isUnderlined.value,
-    textAlign: textAlign.value,
-    fill: textColor.value,
-  };
-
-  props.onTextAdded(textConfig);
-
-  // Reset the text field after adding
-  textContent.value = "";
+  emit("addText");
 };
-
-// Computed style for the preview
-const textPreviewStyle = computed(() => {
-  return {
-    fontFamily: fontFamily.value,
-    fontSize: `${fontSize.value}px`,
-    fontWeight: isBold.value ? "bold" : "normal",
-    fontStyle: isItalic.value ? "italic" : "normal",
-    textDecoration: isUnderlined.value ? "underline" : "none",
-    textAlign: textAlign.value,
-    color: textColor.value,
-  };
-});
 </script>
 
 <style scoped>
-.text-editor-container {
+.form-input {
   width: 100%;
+  border-radius: 0.25rem;
+  border-width: 1px;
+  padding: 0.5rem;
+}
+
+.form-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.5); /* blue-500 with 50% opacity */
 }
 </style>
