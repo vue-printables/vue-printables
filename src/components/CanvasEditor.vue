@@ -22,6 +22,7 @@ import { onMounted, onUnmounted, shallowRef, useTemplateRef } from "vue";
 import { Canvas, Rect } from "fabric";
 import imageUrl from "~/assets/t-shirt.jpg";
 import type { Size } from "~/types/common";
+import { InteractiveFabricObject } from "fabric";
 
 const props = withDefaults(
   defineProps<{
@@ -44,6 +45,20 @@ const canvasInstance = shallowRef<Canvas | null>(null);
 const mainCanvasRef = useTemplateRef("mainCanvas");
 
 onMounted(async () => {
+  InteractiveFabricObject.ownDefaults = {
+    ...InteractiveFabricObject.ownDefaults,
+    hasControls: true,
+    cornerSize: 10,
+    cornerStrokeColor: "#0066cc",
+    cornerColor: "#99ccff",
+    cornerStyle: "circle",
+    transparentCorners: false,
+    cornerDashArray: null,
+    centeredScaling: true,
+    centeredRotation: true,
+    borderDashArray: [5, 2],
+  };
+
   if (mainCanvasRef.value) {
     // Create a "design area" rect that visually indicates the printable region
     const printableArea = new Rect({
@@ -52,19 +67,8 @@ onMounted(async () => {
       strokeUniform: true,
       fill: "transparent",
       stroke: "#ff6600",
-      borderDashArray: [5, 2],
       borderScaleFactor: 2,
       selectable: true,
-      hasControls: true,
-      cornerSize: 10,
-      cornerCursor: "pointer",
-      cornerStrokeColor: "#0066cc",
-      cornerColor: "#99ccff",
-      cornerStyle: "circle",
-      transparentCorners: false,
-      cornerDashArray: null,
-      centeredScaling: true,
-      centeredRotation: true,
       setControlsVisibility: {
         mtr: false, // Hide rotation control if not needed
       },
