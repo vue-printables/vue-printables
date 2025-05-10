@@ -37,26 +37,65 @@
           <ImageUploader @image-uploaded="addImage" />
         </div>
         <div v-show="activeTab === 'text'" class="tab-panel">
-          <TextEditor @text-added="addText" />
+          <TextEditor
+            :values="editingText ? activeTextValues : textProperties"
+            :editing="editingText"
+            @addText="addText(textProperties)"
+            @update="handleTextUpdates"
+          />
         </div>
       </div>
-
       <CanvasEditor ref="canvasEditor" />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, useTemplateRef } from "vue";
+import { computed, ref, useTemplateRef } from "vue";
 import CanvasEditor from "~/components/CanvasEditor.vue";
 import ImageUploader from "~/components/ImageUploader.vue";
 import TextEditor from "~/components/Editor.vue";
 import useText from "~/composables/useText";
 import useImage from "~/composables/useImage";
+import type { TextConfigs } from "~/types/common";
+import type { FabricText } from "fabric";
 
 const activeTab = ref<"image" | "text">("image");
 const canvasRef = useTemplateRef("canvasEditor");
+const textProperties = ref<TextConfigs>({
+  fontFamily: "Arial",
+  fontSize: 24,
+  fontWeight: "normal",
+  fontStyle: "normal",
+  stroke: "",
+  text: "",
+  underline: false,
+  fill: "#000000",
+});
 
-const { addText } = useText(canvasRef);
+const { addText, updateText } = useText(canvasRef);
 const { addImage } = useImage(canvasRef);
+
+const editingText = computed(() => canvasRef.value?.activeObj?.type === "text");
+const activeTextValues = computed((): TextConfigs => {
+  const activeObj = canvasRef.value?.activeObj as FabricText;
+  return {
+    fontFamily: activeObj.fontFamily,
+    fontSize: activeObj.fontSize,
+    fontWeight: activeObj.fontWeight,
+    fontStyle: activeObj.fontStyle,
+    stroke: activeObj.stroke?.toString(),
+    text: activeObj.text,
+    underline: activeObj.underline,
+    fill: activeObj.fill?.toString(),
+  };
+});
+
+const handleTextUpdates = (key: string, value: string) => {
+  if (editingText.value) {
+    updateText({ [key]: value });
+  } else {
+    textProperties.value[key] = value;
+  }
+};
 </script>

@@ -7,12 +7,18 @@ export type Size = {
 };
 
 export type TextConfigs = {
+  [key: string];
   text: string;
   fontFamily: string;
   fontSize: number;
   fontWeight: "normal" | "bold";
-  fontStyle: "" | "normal" | "italic" | "oblique";
+  fontStyle?: "" | "normal" | "italic" | "oblique";
   underline: boolean;
-  fill: string;
-  stroke: string;
+  fill?: string;
+  stroke?: string;
 };
+
+export type CanvasTemplateRef = TemplateRefType<{
+  canvasInstance: Canvas | null;
+  activeObj: FabricObject | null;
+}>;
