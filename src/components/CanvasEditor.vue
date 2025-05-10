@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, shallowRef, useTemplateRef } from "vue";
-import { Canvas, Rect } from "fabric";
+import { Canvas, FabricObject, Rect } from "fabric";
 import imageUrl from "~/assets/t-shirt.jpg";
 import type { Size } from "~/types/common";
 import { InteractiveFabricObject } from "fabric";
@@ -42,6 +42,8 @@ const props = withDefaults(
 );
 
 const canvasInstance = shallowRef<Canvas | null>(null);
+const activeObj = shallowRef<FabricObject | null>(null);
+
 const mainCanvasRef = useTemplateRef("mainCanvas");
 
 onMounted(async () => {
@@ -113,6 +115,16 @@ onMounted(async () => {
       });
     });
 
+    canvasInstance.value.on("mouse:down", () => {
+      const obj = canvasInstance.value?.getActiveObject();
+
+      if (obj) {
+        activeObj.value = obj;
+      } else {
+        activeObj.value = null;
+      }
+    });
+
     canvasInstance.value.add(printableArea);
     canvasInstance.value.centerObject(printableArea);
     canvasInstance.value.centerObject(mainClipPath);
@@ -132,6 +144,7 @@ onUnmounted(async () => {
 
 defineExpose({
   canvasInstance,
+  activeObj,
 });
 </script>
 
