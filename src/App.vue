@@ -34,7 +34,12 @@
 
         <!-- Tab Content -->
         <div v-show="activeTab === 'image'" class="tab-panel">
-          <ImageUploader @image-uploaded="addImage" />
+          <ImageUploader
+            :values="editingImage ? activeImageValues : imageProperties"
+            :editing="editingImage"
+            @image-uploaded="addImage"
+            @update="handleImageUpdates"
+          />
         </div>
         <div v-show="activeTab === 'text'" class="tab-panel">
           <TextEditor
@@ -45,6 +50,7 @@
           />
         </div>
       </div>
+
       <CanvasEditor ref="canvasEditor" />
     </main>
   </div>
@@ -57,11 +63,12 @@ import ImageUploader from "~/components/ImageUploader.vue";
 import TextEditor from "~/components/Editor.vue";
 import useText from "~/composables/useText";
 import useImage from "~/composables/useImage";
-import type { TextConfigs } from "~/types/common";
-import type { FabricText } from "fabric";
+import type { ImgConfigs, TextConfigs } from "~/types/common";
+import type { FabricImage, FabricText } from "fabric";
 
 const activeTab = ref<"image" | "text">("image");
 const canvasRef = useTemplateRef("canvasEditor");
+
 const textProperties = ref<TextConfigs>({
   fontFamily: "Arial",
   fontSize: 24,
@@ -73,10 +80,21 @@ const textProperties = ref<TextConfigs>({
   fill: "#000000",
 });
 
+const imageProperties = ref<ImgConfigs>({
+  width: 200,
+  height: 200,
+  opacity: 1,
+  angle: 0,
+});
+
 const { addText, updateText } = useText(canvasRef);
-const { addImage } = useImage(canvasRef);
+const { addImage, updateImage } = useImage(canvasRef);
 
 const editingText = computed(() => canvasRef.value?.activeObj?.type === "text");
+const editingImage = computed(
+  () => canvasRef.value?.activeObj?.type === "image",
+);
+
 const activeTextValues = computed((): TextConfigs => {
   const activeObj = canvasRef.value?.activeObj as FabricText;
   return {
@@ -91,11 +109,29 @@ const activeTextValues = computed((): TextConfigs => {
   };
 });
 
+const activeImageValues = computed(() => {
+  const activeObj = canvasRef.value?.activeObj as FabricImage;
+  return {
+    width: activeObj.width,
+    height: activeObj.height,
+    opacity: activeObj.opacity,
+    angle: activeObj.angle,
+  };
+});
+
 const handleTextUpdates = (key: string, value: string) => {
   if (editingText.value) {
-    updateText({ [key]: value });
+    updateText({ [key]: value } as TextConfigs);
   } else {
     textProperties.value[key] = value;
+  }
+};
+
+const handleImageUpdates = (key: string, value: number) => {
+  if (editingImage.value) {
+    updateImage({ [key]: value } as ImgConfigs);
+  } else {
+    imageProperties.value[key] = value;
   }
 };
 </script>

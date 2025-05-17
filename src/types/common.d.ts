@@ -18,6 +18,14 @@ export type TextConfigs = {
   stroke?: string;
 };
 
+export type ImgConfigs = {
+  [key: string];
+  width: number;
+  height: number;
+  opacity?: number;
+  angle?: number;
+};
+
 export type CanvasTemplateRef = TemplateRefType<{
   canvasInstance: Canvas | null;
   activeObj: FabricObject | null;

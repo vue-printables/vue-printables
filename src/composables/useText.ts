@@ -11,8 +11,8 @@ export default function useText(canvasRef: CanvasTemplateRef) {
     textObj.controls.dd = new Control({
       x: 0.5,
       y: -0.5,
-      offsetY: -16,
-      offsetX: 16,
+      offsetY: -12,
+      offsetX: 12,
       cursorStyle: "pointer",
       render: renderDeleteControl,
       mouseDownHandler: () => {
