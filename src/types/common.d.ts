@@ -30,3 +30,9 @@ export type CanvasTemplateRef = TemplateRefType<{
   canvasInstance: Canvas | null;
   activeObj: FabricObject | null;
 }>;
+
+export interface CanvasEditorOptions {
+  productImageUrl: string;
+  canvasSize?: Partial<Size>;
+  clipPathSize?: Partial<Size>;
+}
