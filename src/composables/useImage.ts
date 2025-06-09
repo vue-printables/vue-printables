@@ -36,6 +36,7 @@ export default function useImage(canvasRef: CanvasTemplateRef) {
     canvasRef.canvasInstance.value.add(image);
     canvasRef.canvasInstance.value.centerObject(image);
     canvasRef.canvasInstance.value.setActiveObject(image);
+    canvasRef.activeObj.value = image;
     canvasRef.canvasInstance.value.requestRenderAll();
   };
 
