@@ -1,4 +1,4 @@
-import { shallowRef } from "vue";
+import { onMounted, onUnmounted, shallowRef } from "vue";
 import {
   Canvas,
   FabricImage,
@@ -10,13 +10,14 @@ import type { CanvasEditorOptions, TemplateRefType } from "~/types/common";
 
 export default function useCanvas(
   canvasRef: TemplateRefType<HTMLCanvasElement | null>,
+  options: CanvasEditorOptions,
 ) {
   const canvasInstance = shallowRef<Canvas | null>(null);
   const clipPath = shallowRef<Rect | null>(null);
   const designArea = shallowRef<Rect | null>(null);
   const activeObj = shallowRef<FabricObject | null>(null);
 
-  const initCanvas = async (options: CanvasEditorOptions) => {
+  onMounted(async () => {
     const { productImageUrl, canvasSize, clipPathSize } = options;
 
     const size = {
@@ -110,10 +111,9 @@ export default function useCanvas(
       // Initial clip path sync
       updateClipPath();
     } catch (error) {
-      console.error("Failed to initialize canvas:", error);
       throw new Error(`Failed to initialize canvas: ${error}`);
     }
-  };
+  });
 
   // Create and Sync the Clip Path for all objects on the canvas
   const updateClipPath = () => {
@@ -138,22 +138,18 @@ export default function useCanvas(
     canvasInstance.value.requestRenderAll();
   };
 
-  const cleanup = async () => {
-    if (canvasInstance.value) {
-      await canvasInstance.value?.dispose();
-      canvasInstance.value = null;
-      clipPath.value = null;
-      designArea.value = null;
-      activeObj.value = null;
-    }
-  };
+  onUnmounted(async () => {
+    canvasInstance.value?.dispose();
+    canvasInstance.value = null;
+    clipPath.value = null;
+    designArea.value = null;
+    activeObj.value = null;
+  });
 
   return {
     canvasInstance,
     designArea,
     clipPath,
     activeObj,
-    initCanvas,
-    cleanup,
   };
 }
