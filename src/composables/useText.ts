@@ -31,6 +31,7 @@ export default function useText(canvasRef: CanvasTemplateRef) {
     canvasRef.canvasInstance.value.add(textObj);
     canvasRef.canvasInstance.value.centerObject(textObj);
     canvasRef.canvasInstance.value.setActiveObject(textObj);
+    canvasRef.activeObj.value = textObj;
     canvasRef.canvasInstance.value.requestRenderAll();
   };
 
