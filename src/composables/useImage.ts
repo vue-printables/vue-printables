@@ -4,7 +4,30 @@ import { renderDeleteControl } from "~/utils/fabricHelpers";
 
 export default function useImage(canvasRef: CanvasTemplateRef) {
   const addImage = (imgElement: HTMLImageElement) => {
-    const image = new FabricImage(imgElement);
+    if (
+      !canvasRef.canvasInstance.value ||
+      !canvasRef.designArea.value ||
+      !canvasRef.clipPath.value
+    )
+      return;
+
+    const image = new FabricImage(imgElement, {
+      clipPath: canvasRef.clipPath.value,
+      left:
+        canvasRef.designArea.value.left +
+        canvasRef.designArea.value.getScaledWidth() * 0.1,
+      top:
+        canvasRef.designArea.value.top +
+        canvasRef.designArea.value.getScaledHeight() * 0.1,
+    });
+
+    const scale = Math.min(
+      (canvasRef.designArea.value.getScaledWidth() * 0.8) / image.width,
+      (canvasRef.designArea.value.getScaledHeight() * 0.8) / image.height,
+    );
+
+    image.set({ scaleX: scale, scaleY: scale });
+
     image.controls.dd = new Control({
       x: 0.5,
       y: -0.5,
@@ -13,18 +36,19 @@ export default function useImage(canvasRef: CanvasTemplateRef) {
       cursorStyle: "pointer",
       render: renderDeleteControl,
       mouseDownHandler: () => {
-        canvasRef.value?.canvasInstance?.remove(image);
+        canvasRef.canvasInstance.value?.remove(image);
       },
     });
-    canvasRef.value?.canvasInstance?.add(image);
-    canvasRef.value?.canvasInstance?.centerObject(image);
+    canvasRef.canvasInstance.value.add(image);
+    canvasRef.canvasInstance.value.setActiveObject(image);
+    canvasRef.canvasInstance.value.requestRenderAll();
   };
 
   const updateImage = (imgConfig: ImgConfigs) => {
-    const activeObj = canvasRef.value?.activeObj;
+    const activeObj = canvasRef.activeObj.value;
     if (activeObj && activeObj?.type === "image") {
       activeObj.set(imgConfig);
-      canvasRef.value?.canvasInstance?.renderAll();
+      canvasRef.canvasInstance.value?.requestRenderAll();
     } else {
       if (activeObj && activeObj?.type !== "image") {
         throw new Error(

@@ -1,4 +1,5 @@
-import type { ShallowRef } from "vue";
+import type { Canvas, FabricObject, Rect } from "fabric";
+import type { Ref, ShallowRef } from "vue";
 export type TemplateRefType<T> = Readonly<ShallowRef<T | null>>;
 
 export type Size = {
@@ -26,10 +27,12 @@ export type ImgConfigs = {
   angle?: number;
 };
 
-export type CanvasTemplateRef = TemplateRefType<{
-  canvasInstance: Canvas | null;
-  activeObj: FabricObject | null;
-}>;
+export type CanvasTemplateRef = {
+  canvasInstance: Ref<Canvas | null>;
+  designArea: Ref<Rect | null>;
+  clipPath: Ref<Rect | null>;
+  activeObj: Ref<FabricObject | null>;
+};
 
 export interface CanvasEditorOptions {
   productImageUrl: string;
