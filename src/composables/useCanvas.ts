@@ -1,4 +1,4 @@
-import { shallowRef } from "vue";
+import { onMounted, onUnmounted, shallowRef } from "vue";
 import {
   Canvas,
   FabricImage,
@@ -10,13 +10,14 @@ import type { CanvasEditorOptions, TemplateRefType } from "~/types/common";
 
 export default function useCanvas(
   canvasRef: TemplateRefType<HTMLCanvasElement | null>,
+  options: CanvasEditorOptions,
 ) {
   const canvasInstance = shallowRef<Canvas | null>(null);
   const clipPath = shallowRef<Rect | null>(null);
   const designArea = shallowRef<Rect | null>(null);
   const activeObj = shallowRef<FabricObject | null>(null);
 
-  const initCanvas = async (options: CanvasEditorOptions) => {
+  onMounted(async () => {
     const { productImageUrl, canvasSize, clipPathSize } = options;
 
     const size = {
@@ -76,7 +77,7 @@ export default function useCanvas(
 
       canvasInstance.value.backgroundImage = productImage;
 
-      // Create design area visual indicator
+      // Create design area visual indicator/control for canvas clippath
       designArea.value = new Rect({
         ...designAreaSize,
         fill: "transparent",
@@ -85,17 +86,15 @@ export default function useCanvas(
         selectable: true,
         evented: true,
         hasControls: true,
+        // FIXME: if you are going to lock rotation remove it form id
         lockRotation: true,
       });
 
       canvasInstance.value.add(designArea.value);
+      // FIXME: design Area won't be centered always. you should pass printable area position as an argument.
+      // TODO: we will end up making or own centerObject function that centers object which centers the object relative to printable area.
       canvasInstance.value.centerObject(designArea.value);
       canvasInstance.value.bringObjectToFront(designArea.value);
-
-      // Set up event handlers
-      designArea.value.on("moving", updateClipPath);
-      designArea.value.on("scaling", updateClipPath);
-      designArea.value.on("resizing", updateClipPath);
 
       canvasInstance.value.on("mouse:down", () => {
         const obj = canvasInstance.value?.getActiveObject();
@@ -107,53 +106,41 @@ export default function useCanvas(
         }
       });
 
-      // Initial clip path sync
-      updateClipPath();
+      // Create clippath from design area while taking in consideration stroke of 3px
+      clipPath.value = (await designArea.value.clone()).set({
+        left: designArea.value.left + 3,
+        top: designArea.value.top + 3,
+        width: designAreaSize.width - 6,
+        height: designAreaSize.height - 6,
+        absolutePositioned: true,
+      });
+      // Update clippath when moving design area
+      designArea.value.on("moving", async (e) => {
+        clipPath.value?.set({
+          left: e.transform.target.left + 3,
+          top: e.transform.target.top + 3,
+          width: designAreaSize.width - 6,
+          height: designAreaSize.height - 6,
+          absolutePositioned: true,
+        });
+      });
     } catch (error) {
-      console.error("Failed to initialize canvas:", error);
       throw new Error(`Failed to initialize canvas: ${error}`);
     }
-  };
+  });
 
-  // Create and Sync the Clip Path for all objects on the canvas
-  const updateClipPath = () => {
-    if (!canvasInstance.value || !designArea.value) return;
-
-    // Create a clip path that matches the design area's dimensions and position
-    clipPath.value = new Rect({
-      left: designArea.value.left,
-      top: designArea.value.top,
-      width: designArea.value.getScaledWidth(),
-      height: designArea.value.getScaledHeight(),
-      absolutePositioned: true,
-    });
-
-    // Iterate over all objects on the canvas and apply the same clip path
-    canvasInstance.value.forEachObject((obj) => {
-      // Do not apply the clip path to the design area rect itself
-      if (obj !== designArea.value && clipPath.value) {
-        obj.clipPath = clipPath.value;
-      }
-    });
-    canvasInstance.value.requestRenderAll();
-  };
-
-  const cleanup = async () => {
-    if (canvasInstance.value) {
-      await canvasInstance.value?.dispose();
-      canvasInstance.value = null;
-      clipPath.value = null;
-      designArea.value = null;
-      activeObj.value = null;
-    }
-  };
+  onUnmounted(async () => {
+    canvasInstance.value?.dispose();
+    canvasInstance.value = null;
+    clipPath.value = null;
+    designArea.value = null;
+    activeObj.value = null;
+  });
 
   return {
     canvasInstance,
     designArea,
     clipPath,
     activeObj,
-    initCanvas,
-    cleanup,
   };
 }
