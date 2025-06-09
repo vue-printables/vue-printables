@@ -1,28 +1,64 @@
-import { Control, FabricImage, type Canvas } from "fabric";
-import type { TemplateRefType } from "~/types/common";
+import { Control, FabricImage } from "fabric";
+import type { CanvasTemplateRef, ImgConfigs } from "~/types/common";
 import { renderDeleteControl } from "~/utils/fabricHelpers";
 
-export default function useImage(
-  canvasRef: TemplateRefType<{
-    canvasInstance: Canvas | null;
-  }>,
-) {
+export default function useImage(canvasRef: CanvasTemplateRef) {
   const addImage = (imgElement: HTMLImageElement) => {
-    const image = new FabricImage(imgElement);
+    if (
+      !canvasRef.canvasInstance.value ||
+      !canvasRef.designArea.value ||
+      !canvasRef.clipPath.value
+    )
+      return;
+
+    const image = new FabricImage(imgElement, {
+      clipPath: canvasRef.clipPath.value,
+      left:
+        canvasRef.designArea.value.left +
+        canvasRef.designArea.value.getScaledWidth() * 0.1,
+      top:
+        canvasRef.designArea.value.top +
+        canvasRef.designArea.value.getScaledHeight() * 0.1,
+    });
+
+    const scale = Math.min(
+      (canvasRef.designArea.value.getScaledWidth() * 0.8) / image.width,
+      (canvasRef.designArea.value.getScaledHeight() * 0.8) / image.height,
+    );
+
+    image.set({ scaleX: scale, scaleY: scale });
+
     image.controls.dd = new Control({
       x: 0.5,
       y: -0.5,
-      offsetY: -16,
-      offsetX: 16,
+      offsetY: -12,
+      offsetX: 12,
       cursorStyle: "pointer",
       render: renderDeleteControl,
       mouseDownHandler: () => {
-        canvasRef.value?.canvasInstance?.remove(image);
+        canvasRef.canvasInstance.value?.remove(image);
       },
     });
-    canvasRef.value?.canvasInstance?.add(image);
-    canvasRef.value?.canvasInstance?.centerObject(image);
+    canvasRef.canvasInstance.value.add(image);
+    canvasRef.canvasInstance.value.setActiveObject(image);
+    canvasRef.canvasInstance.value.requestRenderAll();
   };
 
-  return { addImage };
+  const updateImage = (imgConfig: ImgConfigs) => {
+    const activeObj = canvasRef.activeObj.value;
+    if (activeObj && activeObj?.type === "image") {
+      activeObj.set(imgConfig);
+      canvasRef.canvasInstance.value?.requestRenderAll();
+    } else {
+      if (activeObj && activeObj?.type !== "image") {
+        throw new Error(
+          `Active object select not of type "Image" is of type "${activeObj?.type}"`,
+        );
+      } else {
+        throw new Error("No active object selected");
+      }
+    }
+  };
+
+  return { addImage, updateImage };
 }
