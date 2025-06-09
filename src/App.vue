@@ -61,14 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  onMounted,
-  onUnmounted,
-  ref,
-  shallowRef,
-  useTemplateRef,
-} from "vue";
+import { computed, ref, shallowRef, useTemplateRef } from "vue";
 import ImageUploader from "~/components/ImageUploader.vue";
 import TextEditor from "~/components/Editor.vue";
 import useText from "~/composables/useText";
@@ -82,8 +75,14 @@ const activeTab = ref<"image" | "text">("image");
 
 const canvasRef = useTemplateRef("mainCanvas");
 
-const { canvasInstance, designArea, clipPath, activeObj, cleanup, initCanvas } =
-  useCanvas(canvasRef);
+const { canvasInstance, designArea, clipPath, activeObj } = useCanvas(
+  canvasRef,
+  {
+    productImageUrl: imageUrl,
+    canvasSize: { width: 550, height: 600 },
+    clipPathSize: { width: 200, height: 300 },
+  },
+);
 
 const canvasStates = shallowRef({
   canvasInstance,
@@ -155,18 +154,6 @@ const handleImageUpdates = (key: string, value: number) => {
     imageProperties.value[key] = value;
   }
 };
-
-onMounted(async () => {
-  await initCanvas({
-    productImageUrl: imageUrl,
-    canvasSize: { width: 550, height: 600 },
-    clipPathSize: { width: 200, height: 300 },
-  });
-});
-
-onUnmounted(async () => {
-  await cleanup();
-});
 </script>
 
 <style>
