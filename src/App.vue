@@ -84,6 +84,7 @@ const { canvasInstance, designArea, clipPath, activeObj } = useCanvas(
   },
 );
 
+// FIXME: remove this state it serves no purpose other than cleaning up composables calls
 const canvasStates = shallowRef({
   canvasInstance,
   designArea,
