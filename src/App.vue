@@ -51,23 +51,46 @@
         </div>
       </div>
 
-      <CanvasEditor ref="canvasEditor" />
+      <div
+        class="custom-design relative flex h-[600px] w-[550px] flex-col overflow-hidden rounded border border-gray-300"
+      >
+        <canvas ref="mainCanvas" />
+      </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from "vue";
-import CanvasEditor from "~/components/CanvasEditor.vue";
+import {
+  computed,
+  onMounted,
+  onUnmounted,
+  ref,
+  shallowRef,
+  useTemplateRef,
+} from "vue";
 import ImageUploader from "~/components/ImageUploader.vue";
 import TextEditor from "~/components/Editor.vue";
 import useText from "~/composables/useText";
 import useImage from "~/composables/useImage";
 import type { ImgConfigs, TextConfigs } from "~/types/common";
 import type { FabricImage, FabricText } from "fabric";
+import useCanvas from "./composables/useCanvas";
+import imageUrl from "~/assets/t-shirt.jpg";
 
 const activeTab = ref<"image" | "text">("image");
-const canvasRef = useTemplateRef("canvasEditor");
+
+const canvasRef = useTemplateRef("mainCanvas");
+
+const { canvasInstance, designArea, clipPath, activeObj, cleanup, initCanvas } =
+  useCanvas(canvasRef);
+
+const canvasStates = shallowRef({
+  canvasInstance,
+  designArea,
+  clipPath,
+  activeObj,
+});
 
 const textProperties = ref<TextConfigs>({
   fontFamily: "Arial",
@@ -87,35 +110,33 @@ const imageProperties = ref<ImgConfigs>({
   angle: 0,
 });
 
-const { addText, updateText } = useText(canvasRef);
-const { addImage, updateImage } = useImage(canvasRef);
+const { addText, updateText } = useText(canvasStates.value);
+const { addImage, updateImage } = useImage(canvasStates.value);
 
-const editingText = computed(() => canvasRef.value?.activeObj?.type === "text");
-const editingImage = computed(
-  () => canvasRef.value?.activeObj?.type === "image",
-);
+const editingText = computed(() => activeObj.value?.type === "text");
+const editingImage = computed(() => activeObj.value?.type === "image");
 
 const activeTextValues = computed((): TextConfigs => {
-  const activeObj = canvasRef.value?.activeObj as FabricText;
+  const activeObject = activeObj.value as FabricText;
   return {
-    fontFamily: activeObj.fontFamily,
-    fontSize: activeObj.fontSize,
-    fontWeight: activeObj.fontWeight,
-    fontStyle: activeObj.fontStyle,
-    stroke: activeObj.stroke?.toString(),
-    text: activeObj.text,
-    underline: activeObj.underline,
-    fill: activeObj.fill?.toString(),
+    fontFamily: activeObject.fontFamily,
+    fontSize: activeObject.fontSize,
+    fontWeight: activeObject.fontWeight as any,
+    fontStyle: activeObject.fontStyle as any,
+    stroke: activeObject.stroke?.toString(),
+    text: activeObject.text,
+    underline: activeObject.underline,
+    fill: activeObject.fill?.toString(),
   };
 });
 
 const activeImageValues = computed(() => {
-  const activeObj = canvasRef.value?.activeObj as FabricImage;
+  const activeObject = activeObj.value as FabricImage;
   return {
-    width: activeObj.width,
-    height: activeObj.height,
-    opacity: activeObj.opacity,
-    angle: activeObj.angle,
+    width: activeObject.width,
+    height: activeObject.height,
+    opacity: activeObject.opacity,
+    angle: activeObject.angle,
   };
 });
 
@@ -134,4 +155,27 @@ const handleImageUpdates = (key: string, value: number) => {
     imageProperties.value[key] = value;
   }
 };
+
+onMounted(async () => {
+  await initCanvas({
+    productImageUrl: imageUrl,
+    canvasSize: { width: 550, height: 600 },
+    clipPathSize: { width: 200, height: 300 },
+  });
+});
+
+onUnmounted(async () => {
+  await cleanup();
+});
 </script>
+
+<style>
+.custom-design {
+  /* classes provided by fabric.js */
+  .canvas-container {
+    position: absolute !important;
+    left: 0;
+    top: 0;
+  }
+}
+</style>
