@@ -13,12 +13,6 @@ export default function useImage(canvasRef: CanvasTemplateRef) {
 
     const image = new FabricImage(imgElement, {
       clipPath: canvasRef.clipPath.value,
-      left:
-        canvasRef.designArea.value.left +
-        canvasRef.designArea.value.getScaledWidth() * 0.1,
-      top:
-        canvasRef.designArea.value.top +
-        canvasRef.designArea.value.getScaledHeight() * 0.1,
     });
 
     const scale = Math.min(
@@ -40,7 +34,9 @@ export default function useImage(canvasRef: CanvasTemplateRef) {
       },
     });
     canvasRef.canvasInstance.value.add(image);
+    canvasRef.canvasInstance.value.centerObject(image);
     canvasRef.canvasInstance.value.setActiveObject(image);
+    canvasRef.activeObj.value = image;
     canvasRef.canvasInstance.value.requestRenderAll();
   };
 

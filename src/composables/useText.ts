@@ -14,13 +14,8 @@ export default function useText(canvasRef: CanvasTemplateRef) {
     const textObj = new FabricText(textConfig.text, {
       ...textConfig,
       clipPath: canvasRef.clipPath.value,
-      left:
-        canvasRef.designArea.value.left +
-        canvasRef.designArea.value.getScaledWidth() * 0.1,
-      top:
-        canvasRef.designArea.value.top +
-        canvasRef.designArea.value.getScaledHeight() * 0.4,
     });
+
     textObj.controls.dd = new Control({
       x: 0.5,
       y: -0.5,
@@ -32,8 +27,11 @@ export default function useText(canvasRef: CanvasTemplateRef) {
         canvasRef.canvasInstance.value?.remove(textObj);
       },
     });
+
     canvasRef.canvasInstance.value.add(textObj);
+    canvasRef.canvasInstance.value.centerObject(textObj);
     canvasRef.canvasInstance.value.setActiveObject(textObj);
+    canvasRef.activeObj.value = textObj;
     canvasRef.canvasInstance.value.requestRenderAll();
   };
 
