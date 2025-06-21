@@ -1,12 +1,21 @@
 import { onMounted, onUnmounted, shallowRef } from "vue";
+import { changeDpiDataUrl } from "changedpi";
 import {
   Canvas,
   FabricImage,
   FabricObject,
+  FabricText,
   InteractiveFabricObject,
   Rect,
+  type ImageFormat,
 } from "fabric";
-import type { CanvasEditorOptions, TemplateRefType } from "~/types/common";
+
+import type {
+  CanvasEditorOptions,
+  Position,
+  Size,
+  TemplateRefType,
+} from "~/types/common";
 
 export default function useCanvas(
   canvasRef: TemplateRefType<HTMLCanvasElement | null>,
@@ -17,19 +26,19 @@ export default function useCanvas(
   const designArea = shallowRef<Rect | null>(null);
   const activeObj = shallowRef<FabricObject | null>(null);
 
+  const { productImageUrl, canvasSize, clipPathSize, clipPathPos } = options;
+
+  const size = canvasSize ?? {
+    width: 550,
+    height: 600,
+  };
+
+  const designAreaSize = clipPathSize ?? {
+    width: 200,
+    height: 300,
+  };
+
   onMounted(async () => {
-    const { productImageUrl, canvasSize, clipPathSize } = options;
-
-    const size = {
-      width: canvasSize?.width ?? 550,
-      height: canvasSize?.height ?? 600,
-    };
-
-    const designAreaSize = {
-      width: clipPathSize?.width ?? 200,
-      height: clipPathSize?.height ?? 300,
-    };
-
     if (!canvasRef.value) {
       throw new Error("Canvas element ref is not available");
     }
@@ -80,20 +89,19 @@ export default function useCanvas(
       // Create design area visual indicator/control for canvas clippath
       designArea.value = new Rect({
         ...designAreaSize,
+        ...clipPathPos,
         fill: "transparent",
         stroke: "#ff6600",
         strokeWidth: 3,
         selectable: true,
         evented: true,
         hasControls: true,
-        // FIXME: if you are going to lock rotation remove it form id
-        lockRotation: true,
       });
 
+      designArea.value.setControlVisible("mtr", false);
+
       canvasInstance.value.add(designArea.value);
-      // FIXME: design Area won't be centered always. you should pass printable area position as an argument.
-      // TODO: we will end up making or own centerObject function that centers object which centers the object relative to printable area.
-      canvasInstance.value.centerObject(designArea.value);
+      if (!clipPathPos) canvasInstance.value.centerObject(designArea.value);
       canvasInstance.value.bringObjectToFront(designArea.value);
 
       canvasInstance.value.on("mouse:down", () => {
@@ -114,15 +122,28 @@ export default function useCanvas(
         height: designAreaSize.height - 6,
         absolutePositioned: true,
       });
+
       // Update clippath when moving design area
-      designArea.value.on("moving", async (e) => {
-        clipPath.value?.set({
-          left: e.transform.target.left + 3,
-          top: e.transform.target.top + 3,
-          width: designAreaSize.width - 6,
-          height: designAreaSize.height - 6,
-          absolutePositioned: true,
-        });
+      designArea.value.on("moving", async () => {
+        if (designArea.value)
+          clipPath.value?.set({
+            left: designArea.value.left + 3,
+            top: designArea.value.top + 3,
+            width: designArea.value.width - 6,
+            height: designArea.value.height - 6,
+            absolutePositioned: true,
+          });
+      });
+
+      designArea.value.on("scaling", async () => {
+        if (designArea.value)
+          clipPath.value?.set({
+            left: designArea.value.left + 3,
+            top: designArea.value.top + 3,
+            width: designArea.value.width - 6,
+            height: designArea.value.height - 6,
+            absolutePositioned: true,
+          });
       });
     } catch (error) {
       throw new Error(`Failed to initialize canvas: ${error}`);
@@ -137,10 +158,102 @@ export default function useCanvas(
     activeObj.value = null;
   });
 
+  const exportAsImg = async (
+    size: Size,
+    designOption: {
+      size?: Size;
+      position?: Position;
+      dpi?: number;
+    } = {},
+    format: ImageFormat = "jpeg",
+  ) => {
+    if (!clipPath.value || !canvasInstance.value) return;
+
+    // Set default values if not provided
+    const dpi = designOption.dpi || 150;
+    const designSize = designOption.size ?? size;
+
+    const xScale = designSize.width / clipPath.value.getScaledWidth();
+    const yScale = designSize.height / clipPath.value.getScaledHeight();
+
+    const outputCanvas = new Canvas("", {
+      width: size.width,
+      height: size.height,
+    });
+
+    const centerClipPathPos = {
+      left: (size.width - designSize.width) / 2,
+      top: (size.height - designSize.height) / 2,
+    };
+
+    const scaledClipPathNewPosition =
+      designOption.position ?? centerClipPathPos;
+
+    const scaledClipPath = await clipPath.value.clone();
+
+    scaledClipPath.set({
+      left: scaledClipPathNewPosition.left,
+      top: scaledClipPathNewPosition.top,
+      scaleX: clipPath.value.scaleX * xScale,
+      scaleY: clipPath.value.scaleY * yScale,
+    });
+
+    outputCanvas.clipPath = scaledClipPath;
+
+    const offsetX =
+      scaledClipPathNewPosition.left - clipPath.value.left * xScale;
+    const offsetY = scaledClipPathNewPosition.top - clipPath.value.top * yScale;
+
+    const objects = canvasInstance.value.getObjects() || [];
+
+    for (const _obj of objects) {
+      if (_obj.type === "image") {
+        const obj = _obj as FabricImage;
+        const image = await FabricImage.fromURL(obj.getSrc());
+
+        image.set({
+          noScaleCache: true,
+          objectCaching: false,
+          left: obj.left * xScale + offsetX,
+          top: obj.top * yScale + offsetY,
+          scaleX: obj.scaleX * xScale,
+          scaleY: obj.scaleY * yScale,
+          clipPath: null,
+        });
+
+        outputCanvas.add(image);
+      } else if (_obj.type === "text") {
+        const clonedObj = await _obj.clone();
+        clonedObj.set({
+          noScaleCache: true,
+          objectCaching: false,
+          left: _obj.left * xScale + offsetX,
+          top: _obj.top * yScale + offsetY,
+          scaleX: _obj.scaleX * xScale,
+          scaleY: _obj.scaleY * yScale,
+          clipPath: null,
+        });
+
+        outputCanvas.add(clonedObj);
+      }
+    }
+
+    const dataURL = outputCanvas.toDataURL({
+      format,
+      quality: 1,
+      multiplier: 1,
+    });
+
+    const dataURLDpi = changeDpiDataUrl(dataURL, dpi);
+
+    outputCanvas.dispose();
+    return dataURLDpi;
+  };
   return {
     canvasInstance,
     designArea,
     clipPath,
     activeObj,
+    exportAsImg,
   };
 }
