@@ -7,6 +7,11 @@ export type Size = {
   height: number;
 };
 
+export type Position = {
+  left: number;
+  top: number;
+};
+
 export type TextConfigs = {
   [key: string];
   text: string;
@@ -36,6 +41,7 @@ export type CanvasTemplateRef = {
 
 export interface CanvasEditorOptions {
   productImageUrl: string;
-  canvasSize?: Partial<Size>;
-  clipPathSize?: Partial<Size>;
+  canvasSize?: Size;
+  clipPathSize?: Size;
+  clipPathPos?: Position;
 }
