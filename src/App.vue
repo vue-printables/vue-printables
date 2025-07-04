@@ -6,7 +6,6 @@
         Upload, resize and position images or text on a canvas
       </p>
     </header>
-
     <main class="flex justify-center gap-5">
       <div class="toolbar max-w-[590px] grow rounded bg-gray-100 p-4">
         <div class="flex p-2">

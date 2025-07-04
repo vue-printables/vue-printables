@@ -4,7 +4,6 @@ import {
   Canvas,
   FabricImage,
   FabricObject,
-  FabricText,
   InteractiveFabricObject,
   Rect,
   type ImageFormat,
@@ -249,11 +248,16 @@ export default function useCanvas(
     outputCanvas.dispose();
     return dataURLDpi;
   };
+
+  const exportAsJson = () => {
+    return canvasInstance.value?.toJSON();
+  };
   return {
     canvasInstance,
     designArea,
     clipPath,
     activeObj,
     exportAsImg,
+    exportAsJson,
   };
 }
