@@ -80,6 +80,7 @@ const { canvasInstance, designArea, clipPath, activeObj } = useCanvas(
     productImageUrl: imageUrl,
     canvasSize: { width: 550, height: 600 },
     clipPathSize: { width: 200, height: 300 },
+    movableClipPath: true,
   },
 );
 
