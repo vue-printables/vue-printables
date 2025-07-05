@@ -95,6 +95,8 @@ export default function useCanvas(
         selectable: true,
         evented: true,
         hasControls: true,
+        strokeUniform: true,
+        objectCaching: false,
       });
 
       designArea.value.setControlVisible("mtr", false);
@@ -117,8 +119,9 @@ export default function useCanvas(
       clipPath.value = (await designArea.value.clone()).set({
         left: designArea.value.left + 3,
         top: designArea.value.top + 3,
-        width: designAreaSize.width - 6,
-        height: designAreaSize.height - 6,
+        width: designArea.value.getScaledWidth() - 6,
+        height: designArea.value.getScaledHeight() - 6,
+        strokeWidth: 0,
         absolutePositioned: true,
       });
 
@@ -128,33 +131,26 @@ export default function useCanvas(
           clipPath.value?.set({
             left: designArea.value.left + 3,
             top: designArea.value.top + 3,
-            width: designArea.value.width - 6,
-            height: designArea.value.height - 6,
+            width: designArea.value.getScaledWidth() - 6,
+            height: designArea.value.getScaledHeight() - 6,
             absolutePositioned: true,
           });
       });
 
       designArea.value.on("scaling", async () => {
-        if (designArea.value)
+        if (designArea.value) {
           clipPath.value?.set({
             left: designArea.value.left + 3,
             top: designArea.value.top + 3,
-            width: designArea.value.width - 6,
-            height: designArea.value.height - 6,
+            width: designArea.value.getScaledWidth() - 6,
+            height: designArea.value.getScaledHeight() - 6,
             absolutePositioned: true,
           });
+        }
       });
     } catch (error) {
       throw new Error(`Failed to initialize canvas: ${error}`);
     }
-  });
-
-  onUnmounted(async () => {
-    canvasInstance.value?.dispose();
-    canvasInstance.value = null;
-    clipPath.value = null;
-    designArea.value = null;
-    activeObj.value = null;
   });
 
   const exportAsImg = async (
@@ -252,6 +248,15 @@ export default function useCanvas(
   const exportAsJson = () => {
     return canvasInstance.value?.toJSON();
   };
+
+  onUnmounted(async () => {
+    canvasInstance.value?.dispose();
+    canvasInstance.value = null;
+    clipPath.value = null;
+    designArea.value = null;
+    activeObj.value = null;
+  });
+
   return {
     canvasInstance,
     designArea,
