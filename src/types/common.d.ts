@@ -44,4 +44,5 @@ export interface CanvasEditorOptions {
   canvasSize?: Size;
   clipPathSize?: Size;
   clipPathPos?: Position;
+  movableClipPath?: boolean;
 }

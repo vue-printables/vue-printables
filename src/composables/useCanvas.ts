@@ -92,7 +92,7 @@ export default function useCanvas(
         fill: "transparent",
         stroke: "#ff6600",
         strokeWidth: 3,
-        selectable: true,
+        selectable: options.movableClipPath,
         evented: true,
         hasControls: true,
         strokeUniform: true,
