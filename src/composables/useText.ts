@@ -1,5 +1,6 @@
 import { Control, FabricText } from "fabric";
 import type { CanvasTemplateRef, TextConfigs } from "~/types/common";
+import { centerRelativeTo } from "~/utils/fabric";
 import { renderDeleteControl } from "~/utils/fabricHelpers";
 
 export default function useText(canvasRef: CanvasTemplateRef) {
@@ -29,7 +30,7 @@ export default function useText(canvasRef: CanvasTemplateRef) {
     });
 
     canvasRef.canvasInstance.value.add(textObj);
-    canvasRef.canvasInstance.value.centerObject(textObj);
+    centerRelativeTo(textObj, canvasRef.clipPath.value);
     canvasRef.canvasInstance.value.setActiveObject(textObj);
     canvasRef.activeObj.value = textObj;
     canvasRef.canvasInstance.value.requestRenderAll();

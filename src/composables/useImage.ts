@@ -1,5 +1,6 @@
 import { Control, FabricImage } from "fabric";
 import type { CanvasTemplateRef, ImgConfigs } from "~/types/common";
+import { centerRelativeTo } from "~/utils/fabric";
 import { renderDeleteControl } from "~/utils/fabricHelpers";
 
 export default function useImage(canvasRef: CanvasTemplateRef) {
@@ -33,8 +34,9 @@ export default function useImage(canvasRef: CanvasTemplateRef) {
         canvasRef.canvasInstance.value?.remove(image);
       },
     });
+
+    centerRelativeTo(image, canvasRef.designArea.value);
     canvasRef.canvasInstance.value.add(image);
-    canvasRef.canvasInstance.value.centerObject(image);
     canvasRef.canvasInstance.value.setActiveObject(image);
     canvasRef.activeObj.value = image;
     canvasRef.canvasInstance.value.requestRenderAll();
