@@ -1,5 +1,79 @@
-# Vue 3 + TypeScript + Vite
+# Vue Printables
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+A powerful Vue.js library that leverages Fabric.js to make custom product design and customization effortless. Vue Printables provides three essential composables for building interactive canvas-based design tools.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Features
+
+- 🎨 **Canvas Management** - Easy canvas initialization and control
+- 📝 **Text Manipulation** - Add, edit, and style text elements
+- 🖼️ **Image Handling** - Upload, resize, and position images
+- 🎯 **Design Area Control** - Configurable printable areas with clipping
+- 🔧 **TypeScript Support** - Full type safety and IntelliSense
+
+## Quick Start
+
+### Installation
+
+```bash
+npm install vue-printables
+# or
+yarn add vue-printables
+# or
+bun install vue-printables
+```
+
+### Basic Usage
+
+```vue
+<template>
+  <canvas ref="canvasRef" />
+</template>
+
+<script setup>
+import { useTemplateRef } from "vue";
+import { useCanvas, useText, useImage } from "vue-printables";
+
+const canvasRef = useTemplateRef("canvasRef");
+
+// Initialize canvas
+const { canvasInstance, activeObj } = useCanvas(canvasRef, {
+  productImageUrl: "/path/to/product.jpg",
+  canvasSize: { width: 550, height: 600 },
+  clipPathSize: { width: 200, height: 300 },
+});
+
+// Text operations
+const { addText, updateText } = useText({ canvasInstance, activeObj });
+
+// Image operations
+const { addImage, updateImage } = useImage({ canvasInstance, activeObj });
+</script>
+```
+
+## Core Composables
+
+### useCanvas
+
+Manages the main Fabric.js canvas, background images, and design areas.
+
+### useText
+
+Handles text element creation, editing, and styling with full typography control.
+
+### useImage
+
+Manages image uploads, positioning, scaling, and transformations.
+
+## Requirements
+
+- Vue 3.0+
+- TypeScript (recommended)
+- Modern browser with Canvas support
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+## Contributing
+
+Contributions are welcome! Please submit issues or pull requests to help improve Vue Printables.
