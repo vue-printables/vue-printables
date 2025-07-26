@@ -245,8 +245,79 @@ export default function useCanvas(
     return dataURLDpi;
   };
 
-  const exportAsJson = () => {
-    return canvasInstance.value?.toJSON();
+  const exportAsJson = () => canvasInstance.value?.toJSON();
+
+  const loadAsJson = async (canvasJson: any) => {
+    // Load canvas from JSON
+    await canvasInstance.value?.loadFromJSON(canvasJson);
+
+    // Find design area (first rectangle)
+    const rectArea =
+      canvasInstance.value
+        ?.getObjects()
+        .find((obj): obj is Rect => obj.type === "rect") || null;
+
+    if (!rectArea) {
+      throw new Error("No design area rectangle found in json file");
+    }
+
+    // Find clip path from non-rect objects
+    const objectClipPath: Rect =
+      (canvasInstance.value?.getObjects().find((obj) => obj.type !== "rect")
+        ?.clipPath as Rect) || null;
+
+    if (objectClipPath) {
+      clipPath.value = objectClipPath;
+    } else {
+      const clonedRect = await rectArea.clone();
+      clonedRect.set({
+        left: rectArea.left + 3,
+        top: rectArea.top + 3,
+        width: rectArea.getScaledWidth() - 6,
+        height: rectArea.getScaledHeight() - 6,
+        strokeWidth: 0,
+        absolutePositioned: true,
+      });
+
+      clipPath.value = clonedRect;
+    }
+
+    // Setup Event listeners
+    canvasInstance.value?.on("mouse:down", () => {
+      const obj = canvasInstance.value?.getActiveObject();
+
+      if (obj) {
+        activeObj.value = obj;
+      } else {
+        activeObj.value = null;
+      }
+    });
+
+    rectArea.on("moving", async () => {
+      if (designArea.value)
+        clipPath.value?.set({
+          left: designArea.value.left + 3,
+          top: designArea.value.top + 3,
+          width: designArea.value.getScaledWidth() - 6,
+          height: designArea.value.getScaledHeight() - 6,
+          absolutePositioned: true,
+        });
+    });
+
+    rectArea.on("scaling", async () => {
+      if (designArea.value) {
+        clipPath.value?.set({
+          left: designArea.value.left + 3,
+          top: designArea.value.top + 3,
+          width: designArea.value.getScaledWidth() - 6,
+          height: designArea.value.getScaledHeight() - 6,
+          absolutePositioned: true,
+        });
+      }
+    });
+
+    designArea.value = rectArea;
+    canvasInstance.value?.renderAll();
   };
 
   onUnmounted(async () => {
@@ -264,5 +335,6 @@ export default function useCanvas(
     activeObj,
     exportAsImg,
     exportAsJson,
+    loadAsJson,
   };
 }

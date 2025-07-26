@@ -1,11 +1,38 @@
 <template>
-  <div class="min-h-screen bg-white p-4 sm:p-8">
-    <header class="mb-8 text-center">
+  <div class="flex min-h-screen flex-col gap-10 bg-white p-4 sm:p-8">
+    <header class="flex flex-col items-center gap-2.5 text-center">
       <h1 class="text-3xl font-bold text-gray-800">Canvas Editor</h1>
       <p class="text-gray-600">
         Upload, resize and position images or text on a canvas
       </p>
+
+      <div class="flex gap-4">
+        <button
+          class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white shadow-sm transition-colors duration-200 hover:bg-blue-700 hover:shadow-md"
+          @click="handleExport"
+        >
+          <img
+            class="h-5 w-5"
+            src="https://img.icons8.com/ios-filled/50/save--v1.png"
+            alt="save--v1"
+          />
+          <span class="font-medium">Export</span>
+        </button>
+
+        <button
+          class="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white shadow-sm transition-colors duration-200 hover:bg-green-700 hover:shadow-md"
+          @click="handleImport"
+        >
+          <img
+            class="h-5 w-5"
+            src="https://img.icons8.com/material-outlined/24/import.png"
+            alt="import"
+          />
+          <span class="font-medium">Import</span>
+        </button>
+      </div>
     </header>
+
     <main class="flex justify-center gap-5">
       <div class="toolbar max-w-[590px] grow rounded bg-gray-100 p-4">
         <div class="flex p-2">
@@ -67,22 +94,26 @@ import useText from "~/composables/useText";
 import useImage from "~/composables/useImage";
 import type { ImgConfigs, TextConfigs } from "~/types/common";
 import type { FabricImage, FabricText } from "fabric";
-import useCanvas from "./composables/useCanvas";
+import useCanvas from "~/composables/useCanvas";
 import imageUrl from "~/assets/t-shirt.jpg";
 
 const activeTab = ref<"image" | "text">("image");
 
 const canvasRef = useTemplateRef("mainCanvas");
 
-const { canvasInstance, designArea, clipPath, activeObj } = useCanvas(
-  canvasRef,
-  {
-    productImageUrl: imageUrl,
-    canvasSize: { width: 550, height: 600 },
-    clipPathSize: { width: 200, height: 300 },
-    movableClipPath: true,
-  },
-);
+const {
+  canvasInstance,
+  designArea,
+  clipPath,
+  activeObj,
+  exportAsJson,
+  loadAsJson,
+} = useCanvas(canvasRef, {
+  productImageUrl: imageUrl,
+  canvasSize: { width: 550, height: 600 },
+  clipPathSize: { width: 200, height: 300 },
+  movableClipPath: true,
+});
 
 // FIXME: remove this state it serves no purpose other than cleaning up composables calls
 const canvasStates = shallowRef({
@@ -154,6 +185,50 @@ const handleImageUpdates = (key: string, value: number) => {
   } else {
     imageProperties.value[key] = value;
   }
+};
+
+const handleExport = () => {
+  const canvasJson = exportAsJson();
+  const today = new Date();
+  const name = today.toUTCString();
+  const jsonString = JSON.stringify(canvasJson, null, 2);
+
+  const blob = new Blob([jsonString], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${name}.json`;
+
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+const handleImport = () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json";
+
+  input.onchange = (event) => {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const json = e.target?.result as string;
+          loadAsJson(json);
+        } catch (error) {
+          console.error("Error parsing JSON:", error);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  input.click();
 };
 </script>
 
