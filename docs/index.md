@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: "Vue Printables"
-  text: "A set of Vue.js composables that uses Fabric.js to facilitate designing a custom product."
-  tagline: Great custom designed products are guaranteed
+  text: "Build Powerful Canvas Design Tools with Vue 3"
+  tagline: Create stunning product customizers, image editors, and design interfaces with ease
   image:
     src: /logo.svg
     alt: logo
@@ -17,10 +17,13 @@ hero:
       link: https://github.com/vue-printables/vue-printables
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - icon: 🎨
+    title: Canvas Management
+    details: Easy-to-use composable for initializing and controlling Fabric.js canvas with background images and design areas
+  - icon: ✏️
+    title: Text Manipulation
+    details: Comprehensive text handling with font styling, positioning, and real-time editing capabilities
+  - icon: 🖼️
+    title: Image Operations
+    details: Upload, resize, rotate, and position images with automatic scaling and clipping support
 ---
