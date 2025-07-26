@@ -1,8 +1,10 @@
 {
-  "name": "custom-design-printables",
-  "private": true,
+  "name": "vue-printables",
+  "description": "A Powerful Canvas Design Tool for Products Customizations.",
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "bun@1.2.13",
+  "license": "MIT",
   "scripts": {
     "dev": "vite --port 3000",
     "build": "vue-tsc -b && vite build",
@@ -12,13 +14,14 @@
     "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.0.9",
     "changedpi": "^1.0.4",
     "fabric": "^6.6.1",
-    "tailwindcss": "^4.0.9",
     "vue": "^3.5.13"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.0.9",
+    "vite-plugin-dts": "^4.5.4",
+    "tailwindcss": "^4.0.9",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/tsconfig": "^0.7.0",
@@ -28,5 +31,41 @@
     "vite": "^6.2.0",
     "vitepress": "^1.6.3",
     "vue-tsc": "^2.2.4"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0",
+    "fabric": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "vue",
+    "fabric",
+    "canvas",
+    "products",
+    "images",
+    "customization",
+    "printables",
+    "vue-printables"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmedd-mahmoud/custom-design-printables.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ahmedd-mahmoud/custom-design-printables/issues"
+  },
+  "homepage": "https://vue-printables.vuedoo.org",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "types": "./dist/index.d.ts"
+    }
   }
 }

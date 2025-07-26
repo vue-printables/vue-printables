@@ -13,7 +13,7 @@ export type Position = {
 };
 
 export type TextConfigs = {
-  [key: string];
+  [key: string]: any;
   text: string;
   fontFamily: string;
   fontSize: number;
@@ -25,7 +25,7 @@ export type TextConfigs = {
 };
 
 export type ImgConfigs = {
-  [key: string];
+  [key: string]: any;
   width: number;
   height: number;
   opacity?: number;
