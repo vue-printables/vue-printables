@@ -101,6 +101,13 @@ export default defineConfig({
           { text: "useImage", link: "/guide/useImage" },
         ],
       },
+      {
+        text: "Examples",
+        items: [
+          { text: "Printable Area", link: "/examples/printableArea" },
+          { text: "Multiple Instances", link: "/examples/multiInstances" },
+        ],
+      },
     ],
     socialLinks: [
       {
