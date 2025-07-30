@@ -25,7 +25,7 @@ export default function useCanvas(
   const designArea = shallowRef<Rect | null>(null);
   const activeObj = shallowRef<FabricObject | null>(null);
 
-  const { productImageUrl, canvasSize, clipPathSize, clipPathPos } = options;
+  const { bgImgUrl, canvasSize, clipPathSize, clipPathPos } = options;
 
   const size = canvasSize ?? {
     width: 550,
@@ -67,23 +67,25 @@ export default function useCanvas(
         enableRetinaScaling: true,
       });
 
-      // Load and add the product image as a background image
-      const productImage = await FabricImage.fromURL(productImageUrl);
+      if (bgImgUrl) {
+        // Load and add the product image as a background image
+        const productImage = await FabricImage.fromURL(bgImgUrl);
 
-      // Keep original size but scale to fit canvas if needed
-      const imageScale = Math.min(
-        size.width / (productImage.width ?? 1),
-        size.height / (productImage.height ?? 1),
-      );
+        // Keep original size but scale to fit canvas if needed
+        const imageScale = Math.min(
+          size.width / (productImage.width ?? 1),
+          size.height / (productImage.height ?? 1),
+        );
 
-      productImage.set({
-        scaleX: imageScale,
-        scaleY: imageScale,
-        selectable: false,
-        evented: false,
-      });
+        productImage.set({
+          scaleX: imageScale,
+          scaleY: imageScale,
+          selectable: false,
+          evented: false,
+        });
 
-      canvasInstance.value.backgroundImage = productImage;
+        canvasInstance.value.backgroundImage = productImage;
+      }
 
       // Create design area visual indicator/control for canvas clippath
       designArea.value = new Rect({

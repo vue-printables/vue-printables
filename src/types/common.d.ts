@@ -40,7 +40,7 @@ export type CanvasTemplateRef = {
 };
 
 export interface CanvasEditorOptions {
-  productImageUrl: string;
+  bgImgUrl?: string;
   canvasSize?: Size;
   clipPathSize?: Size;
   clipPathPos?: Position;
