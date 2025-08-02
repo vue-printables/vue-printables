@@ -76,6 +76,7 @@ export default defineConfig({
       },
     },
   },
+  appearance: "force-dark",
   themeConfig: {
     search: { provider: "local" },
     outline: [2, 3],
@@ -83,7 +84,6 @@ export default defineConfig({
     nav: [
       { text: "Home", link: "/" },
       { text: "Guide", link: "/guide/introduction" },
-      { text: "Examples", link: "/examples" },
     ],
     sidebar: [
       {
