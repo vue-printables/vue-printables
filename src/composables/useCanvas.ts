@@ -25,17 +25,14 @@ export default function useCanvas(
   const designArea = shallowRef<Rect | null>(null);
   const activeObj = shallowRef<FabricObject | null>(null);
 
-  const { bgImg, size: canvasSize, clipPathOption } = options;
-
-  const size = canvasSize ?? {
-    width: 550,
-    height: 600,
-  };
-
-  const designAreaSize = clipPathOption?.size ?? {
-    width: 200,
-    height: 300,
-  };
+  const {
+    bgImg,
+    clipPathOption,
+    size = {
+      width: 550,
+      height: 600,
+    },
+  } = options;
 
   onMounted(async () => {
     if (!canvasRef.value) {
@@ -74,8 +71,8 @@ export default function useCanvas(
         const imageScale = bgImg.size
           ? 1
           : Math.min(
-              size.width / (productImage.width ?? 1),
-              size.height / (productImage.height ?? 1),
+              (size?.width ?? 1) / (productImage.width ?? 1),
+              (size?.height ?? 1) / (productImage.height ?? 1),
             );
 
         productImage.set({
@@ -90,9 +87,14 @@ export default function useCanvas(
         canvasInstance.value.backgroundImage = productImage;
       }
 
+      const clipPathSize = clipPathOption?.size ?? {
+        width: size.width - 6,
+        height: size.height - 6,
+      };
+
       // Create design area visual indicator/control for canvas clippath
       designArea.value = new Rect({
-        ...designAreaSize,
+        ...clipPathSize,
         ...clipPathOption?.position,
         fill: "transparent",
         stroke: "#ff6600",
@@ -109,19 +111,12 @@ export default function useCanvas(
 
       canvasInstance.value.add(designArea.value);
 
-      if (!clipPathOption?.position)
+      // not a proper solution since the user can make the size equal the canvas size
+      if (!clipPathOption?.position) {
         canvasInstance.value.centerObject(designArea.value);
+      }
+
       canvasInstance.value.bringObjectToFront(designArea.value);
-
-      canvasInstance.value.on("mouse:down", () => {
-        const obj = canvasInstance.value?.getActiveObject();
-
-        if (obj) {
-          activeObj.value = obj;
-        } else {
-          activeObj.value = null;
-        }
-      });
 
       // Create clippath from design area while taking in consideration stroke of 3px
       clipPath.value = (await designArea.value.clone()).set({
@@ -154,6 +149,17 @@ export default function useCanvas(
             height: designArea.value.getScaledHeight() - 6,
             absolutePositioned: true,
           });
+        }
+      });
+
+      //Update active object ref
+      canvasInstance.value.on("mouse:down", () => {
+        const obj = canvasInstance.value?.getActiveObject();
+
+        if (obj) {
+          activeObj.value = obj;
+        } else {
+          activeObj.value = null;
         }
       });
     } catch (error) {

@@ -95,7 +95,6 @@ import useImage from "~/composables/useImage";
 import type { ImgConfigs, TextConfigs } from "~/types/common";
 import type { FabricImage, FabricText } from "fabric";
 import useCanvas from "~/composables/useCanvas";
-import imageUrl from "~/assets/t-shirt.jpg";
 
 const activeTab = ref<"image" | "text">("image");
 
@@ -112,12 +111,7 @@ const {
   bgImg: {
     url: "https://rlv.zcache.co.uk/create_your_own_notebook-rc3a15e21d2a34d75978fc07f918d60b5_ambg4_8byvr_306.jpg",
   },
-  size: { width: 550, height: 600 },
   clipPathOption: {
-    size: {
-      width: 200,
-      height: 300,
-    },
     movable: true,
   },
 });
