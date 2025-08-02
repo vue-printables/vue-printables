@@ -10,7 +10,7 @@ import {
 } from "fabric";
 
 import type {
-  CanvasEditorOptions,
+  CanvasOptions,
   Position,
   Size,
   TemplateRefType,
@@ -18,21 +18,21 @@ import type {
 
 export default function useCanvas(
   canvasRef: TemplateRefType<HTMLCanvasElement | null>,
-  options: CanvasEditorOptions,
+  options: CanvasOptions,
 ) {
   const canvasInstance = shallowRef<Canvas | null>(null);
   const clipPath = shallowRef<Rect | null>(null);
   const designArea = shallowRef<Rect | null>(null);
   const activeObj = shallowRef<FabricObject | null>(null);
 
-  const { bgImgUrl, canvasSize, clipPathSize, clipPathPos } = options;
+  const { bgImg, size: canvasSize, clipPathOption } = options;
 
   const size = canvasSize ?? {
     width: 550,
     height: 600,
   };
 
-  const designAreaSize = clipPathSize ?? {
+  const designAreaSize = clipPathOption?.size ?? {
     width: 200,
     height: 300,
   };
@@ -67,17 +67,20 @@ export default function useCanvas(
         enableRetinaScaling: true,
       });
 
-      if (bgImgUrl) {
+      if (bgImg) {
         // Load and add the product image as a background image
-        const productImage = await FabricImage.fromURL(bgImgUrl);
+        const productImage = await FabricImage.fromURL(bgImg.url);
 
-        // Keep original size but scale to fit canvas if needed
-        const imageScale = Math.min(
-          size.width / (productImage.width ?? 1),
-          size.height / (productImage.height ?? 1),
-        );
+        const imageScale = bgImg.size
+          ? 1
+          : Math.min(
+              size.width / (productImage.width ?? 1),
+              size.height / (productImage.height ?? 1),
+            );
 
         productImage.set({
+          ...bgImg.size,
+          ...bgImg.position,
           scaleX: imageScale,
           scaleY: imageScale,
           selectable: false,
@@ -90,21 +93,24 @@ export default function useCanvas(
       // Create design area visual indicator/control for canvas clippath
       designArea.value = new Rect({
         ...designAreaSize,
-        ...clipPathPos,
+        ...clipPathOption?.position,
         fill: "transparent",
         stroke: "#ff6600",
         strokeWidth: 3,
-        selectable: options.movableClipPath,
+        selectable: clipPathOption?.movable,
         evented: true,
         hasControls: true,
         strokeUniform: true,
         objectCaching: false,
       });
 
+      // Hide rotation control
       designArea.value.setControlVisible("mtr", false);
 
       canvasInstance.value.add(designArea.value);
-      if (!clipPathPos) canvasInstance.value.centerObject(designArea.value);
+
+      if (!clipPathOption?.position)
+        canvasInstance.value.centerObject(designArea.value);
       canvasInstance.value.bringObjectToFront(designArea.value);
 
       canvasInstance.value.on("mouse:down", () => {

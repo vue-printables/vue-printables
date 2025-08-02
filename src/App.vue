@@ -109,9 +109,17 @@ const {
   exportAsJson,
   loadAsJson,
 } = useCanvas(canvasRef, {
-  canvasSize: { width: 550, height: 600 },
-  clipPathSize: { width: 200, height: 300 },
-  movableClipPath: true,
+  bgImg: {
+    url: "https://rlv.zcache.co.uk/create_your_own_notebook-rc3a15e21d2a34d75978fc07f918d60b5_ambg4_8byvr_306.jpg",
+  },
+  size: { width: 550, height: 600 },
+  clipPathOption: {
+    size: {
+      width: 200,
+      height: 300,
+    },
+    movable: true,
+  },
 });
 
 // FIXME: remove this state it serves no purpose other than cleaning up composables calls
