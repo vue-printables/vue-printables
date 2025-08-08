@@ -4,7 +4,7 @@ import { centerRelativeTo } from "~/utils/fabric";
 import { renderDeleteControl } from "~/utils/fabricHelpers";
 
 export default function useImage(canvasRef: CanvasTemplateRef) {
-  const addImage = (imgElement: HTMLImageElement) => {
+  const addImage = async (url: string) => {
     if (
       !canvasRef.canvasInstance.value ||
       !canvasRef.designArea.value ||
@@ -12,7 +12,8 @@ export default function useImage(canvasRef: CanvasTemplateRef) {
     )
       return;
 
-    const image = new FabricImage(imgElement, {
+    const image = await FabricImage.fromURL(url);
+    image.set({
       clipPath: canvasRef.clipPath.value,
     });
 

@@ -4,26 +4,33 @@
       Image Editor
     </h2>
 
-    <!-- Image Upload Section -->
-    <div class="mb-6 rounded-lg bg-white p-6 shadow-sm">
-      <div
-        class="cursor-pointer rounded-lg border-2 border-dashed border-gray-300 p-10 text-center transition-all hover:border-blue-500 hover:bg-blue-50"
-        @click="triggerFileInput"
-      >
+    <div
+      class="flex cursor-pointer flex-col items-center gap-3 rounded-lg border-2 border-dashed border-gray-300 p-10 text-center transition-all hover:border-blue-500 hover:bg-blue-50"
+    >
+      <div v-if="values.src" class="relative">
+        <img alt="Uploaded preview" :src="values.src" />
+        <button
+          class="i-mdi-close-circle-outline absolute -top-5 -right-5 cursor-pointer text-2xl text-red-500 hover:text-red-400 active:text-red-600"
+          @click="$emit('delete')"
+        />
+      </div>
+      <template v-else>
         <input
+          class="hidden"
           type="file"
           ref="fileInput"
           accept="image/*"
-          class="hidden"
           @change="handleImageUpload"
         />
         <button
           class="cursor-pointer rounded-md bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
+          type="button"
+          @click="triggerFileInput"
         >
           Upload Image
         </button>
-        <p class="mt-3 text-sm text-gray-500">or drag and drop an image here</p>
-      </div>
+        <p class="text-sm text-gray-500">or drag and drop an image here</p>
+      </template>
     </div>
 
     <!-- Image Controls Section (only visible when image is uploaded) -->
@@ -133,8 +140,8 @@
       </div>
 
       <button
-        @click="resetControls"
         class="mt-8 flex flex-col justify-between gap-4 rounded bg-gray-500 px-4 py-2 text-white transition-colors hover:cursor-pointer hover:bg-gray-600 sm:flex-row"
+        @click="resetControls"
       >
         Reset Controls
       </button>
@@ -146,18 +153,18 @@
 import { ref } from "vue";
 import type { ImgConfigs } from "~/types/common";
 
-const emit = defineEmits<{
-  imageUploaded: [image: HTMLImageElement];
-  update: [field: string, value: any];
-}>();
-
 const props = defineProps<{
   values: ImgConfigs;
   editing?: boolean;
 }>();
 
+const emit = defineEmits<{
+  update: [field: string, value: any];
+  imageUploaded: [image: string];
+  delete: [];
+}>();
+
 const fileInput = ref<HTMLInputElement | null>(null);
-const initialImage = ref<HTMLImageElement | null>(null);
 const imageProperties = ref<ImgConfigs>({
   width: props.values.width,
   height: props.values.height,
@@ -175,19 +182,14 @@ const updateConfig = (field: string, value: number) => {
 
 const handleImageUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
+  const file = target.files?.item(0);
 
   if (file && file.type.startsWith("image/")) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      if (e.target?.result) {
-        const img = new Image();
-        img.src = e.target?.result as string;
-
-        initialImage.value = img;
-        img.onload = () => {
-          emit("imageUploaded", img);
-        };
+      const result = e.target?.result;
+      if (result) {
+        emit("imageUploaded", result.toString());
       }
     };
     reader.readAsDataURL(file);

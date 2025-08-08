@@ -11,11 +11,7 @@
           class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white shadow-sm transition-colors duration-200 hover:bg-blue-700 hover:shadow-md"
           @click="handleExport"
         >
-          <img
-            class="h-5 w-5"
-            src="https://img.icons8.com/ios-filled/50/save--v1.png"
-            alt="save--v1"
-          />
+          <span class="i-mdi-export h-5 w-5" />
           <span class="font-medium">Export</span>
         </button>
 
@@ -23,11 +19,8 @@
           class="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white shadow-sm transition-colors duration-200 hover:bg-green-700 hover:shadow-md"
           @click="handleImport"
         >
-          <img
-            class="h-5 w-5"
-            src="https://img.icons8.com/material-outlined/24/import.png"
-            alt="import"
-          />
+          <span class="i-mdi-import h-5 w-5" />
+
           <span class="font-medium">Import</span>
         </button>
       </div>
@@ -65,6 +58,7 @@
             :editing="editingImage"
             @image-uploaded="addImage"
             @update="handleImageUpdates"
+            @delete="handleImageDelete"
           />
         </div>
         <div v-show="activeTab === 'text'" class="tab-panel">
@@ -163,12 +157,14 @@ const activeTextValues = computed((): TextConfigs => {
 });
 
 const activeImageValues = computed(() => {
-  const activeObject = activeObj.value as FabricImage;
+  const imageObj = activeObj.value as FabricImage;
+
   return {
-    width: activeObject.width,
-    height: activeObject.height,
-    opacity: activeObject.opacity,
-    angle: activeObject.angle,
+    src: imageObj.getSrc(),
+    width: imageObj.width,
+    height: imageObj.height,
+    opacity: imageObj.opacity,
+    angle: imageObj.angle,
   };
 });
 
@@ -186,6 +182,11 @@ const handleImageUpdates = (key: string, value: number) => {
   } else {
     imageProperties.value[key] = value;
   }
+};
+
+const handleImageDelete = () => {
+  if (activeObj.value) canvasInstance.value?.remove(activeObj.value);
+  activeObj.value = null;
 };
 
 const handleExport = () => {
