@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full">
-    <div class="mb-4 rounded border p-3">
+  <div class="flex w-full flex-col gap-4">
+    <div class="rounded border p-3">
       <label class="mb-2 block text-sm font-medium text-gray-700">
         Enter Text
       </label>
@@ -14,7 +14,7 @@
       />
     </div>
 
-    <div class="formatting-controls mb-4 grid grid-cols-2 gap-3">
+    <div class="formatting-controls grid grid-cols-2 gap-3">
       <!-- Font Family -->
       <div>
         <label class="mb-1 block text-sm font-medium text-gray-700">Font</label>
@@ -94,7 +94,7 @@
     </div>
 
     <!-- Text Preview -->
-    <div class="mb-4 min-h-[60px] rounded border bg-white p-3">
+    <div class="min-h-[60px] rounded border bg-white p-3">
       <p class="mb-1 text-sm text-gray-500">Preview:</p>
       <div :style="textPreviewStyle" class="break-words">
         {{ values.text || "Your text will appear here" }}
