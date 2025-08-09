@@ -47,6 +47,7 @@ export default function useImage(canvasRef: CanvasTemplateRef) {
     const activeObj = canvasRef.activeObj.value;
     if (activeObj && activeObj?.type === "image") {
       activeObj.set(imgConfig);
+      activeObj.setCoords();
       canvasRef.canvasInstance.value?.requestRenderAll();
     } else {
       if (activeObj && activeObj?.type !== "image") {

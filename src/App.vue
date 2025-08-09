@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, shallowRef, useTemplateRef } from "vue";
+import { computed, ref, useTemplateRef } from "vue";
 import ImageUploader from "~/components/ImageUploader/index.vue";
 import TextEditor from "~/components/Editor.vue";
 import useText from "~/composables/useText";
@@ -96,14 +96,6 @@ const {
   },
 });
 
-// FIXME: remove this state it serves no purpose other than cleaning up composables calls
-const canvasStates = shallowRef({
-  canvasInstance,
-  designArea,
-  clipPath,
-  activeObj,
-});
-
 const textProperties = ref<TextConfigs>({
   fontFamily: "Arial",
   fontSize: 24,
@@ -115,8 +107,18 @@ const textProperties = ref<TextConfigs>({
   fill: "#000000",
 });
 
-const { addText, updateText } = useText(canvasStates.value);
-const { addImage, updateImage } = useImage(canvasStates.value);
+const { addText, updateText } = useText({
+  canvasInstance,
+  designArea,
+  clipPath,
+  activeObj,
+});
+const { addImage, updateImage } = useImage({
+  canvasInstance,
+  designArea,
+  clipPath,
+  activeObj,
+});
 
 const editingText = computed(() => activeObj.value?.type === "text");
 const editingImage = computed(() => activeObj.value?.type === "image");
@@ -137,14 +139,15 @@ const activeTextValues = computed((): TextConfigs => {
 
 const activeImageValues = computed(() => {
   const imageObj = activeObj.value as FabricImage;
-  if (imageObj)
+  if (imageObj && imageObj.type === "image") {
     return {
-      src: imageObj.getSrc(),
+      src: imageObj?.getSrc(),
       width: imageObj.width,
       height: imageObj.height,
       opacity: imageObj.opacity,
       angle: imageObj.angle,
     };
+  }
 });
 
 const handleTextUpdates = (key: string, value: string) => {
