@@ -39,10 +39,16 @@ export type CanvasTemplateRef = {
   activeObj: Ref<FabricObject | null>;
 };
 
-export interface CanvasEditorOptions {
-  productImageUrl: string;
-  canvasSize?: Size;
-  clipPathSize?: Size;
-  clipPathPos?: Position;
-  movableClipPath?: boolean;
+export interface CanvasOptions {
+  size?: Size;
+  clipPathOption?: {
+    size?: Size;
+    position?: Position;
+    movable?: boolean;
+  };
+  bgImg?: {
+    url: string;
+    position?: Position;
+    size?: Size;
+  };
 }

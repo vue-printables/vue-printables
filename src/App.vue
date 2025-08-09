@@ -11,11 +11,7 @@
           class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white shadow-sm transition-colors duration-200 hover:bg-blue-700 hover:shadow-md"
           @click="handleExport"
         >
-          <img
-            class="h-5 w-5"
-            src="https://img.icons8.com/ios-filled/50/save--v1.png"
-            alt="save--v1"
-          />
+          <span class="i-mdi-export h-5 w-5" />
           <span class="font-medium">Export</span>
         </button>
 
@@ -23,11 +19,8 @@
           class="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white shadow-sm transition-colors duration-200 hover:bg-green-700 hover:shadow-md"
           @click="handleImport"
         >
-          <img
-            class="h-5 w-5"
-            src="https://img.icons8.com/material-outlined/24/import.png"
-            alt="import"
-          />
+          <span class="i-mdi-import h-5 w-5" />
+
           <span class="font-medium">Import</span>
         </button>
       </div>
@@ -35,46 +28,32 @@
 
     <main class="flex justify-center gap-5">
       <div class="toolbar max-w-[590px] grow rounded bg-gray-100 p-4">
-        <div class="flex p-2">
-          <button
-            class="mr-2 px-4 py-2"
-            :class="
-              activeTab === 'image'
-                ? 'border-b-2 border-blue-500 font-bold'
-                : ''
-            "
-            @click="activeTab = 'image'"
-          >
-            Image Upload
-          </button>
-          <button
-            class="px-4 py-2"
-            :class="
-              activeTab === 'text' ? 'border-b-2 border-blue-500 font-bold' : ''
-            "
-            @click="activeTab = 'text'"
-          >
-            Text Editor
-          </button>
-        </div>
+        <Tabs
+          v-model="activeTab"
+          :tabs="[
+            { key: 'image', label: 'Image Upload' },
+            { key: 'text', label: 'Text Editor' },
+          ]"
+        />
 
-        <!-- Tab Content -->
-        <div v-show="activeTab === 'image'" class="tab-panel">
-          <ImageUploader
-            :values="editingImage ? activeImageValues : imageProperties"
-            :editing="editingImage"
-            @image-uploaded="addImage"
-            @update="handleImageUpdates"
-          />
-        </div>
-        <div v-show="activeTab === 'text'" class="tab-panel">
-          <TextEditor
-            :values="editingText ? activeTextValues : textProperties"
-            :editing="editingText"
-            @addText="addText(textProperties)"
-            @update="handleTextUpdates"
-          />
-        </div>
+        <ImageUploader
+          v-show="activeTab === 'image'"
+          class="tab-panel"
+          :values="activeImageValues"
+          :editing="editingImage"
+          @image-uploaded="addImage"
+          @update="handleImageUpdates"
+          @delete="handleImageDelete"
+        />
+
+        <TextEditor
+          v-show="activeTab === 'text'"
+          class="tab-panel"
+          :values="editingText ? activeTextValues : textProperties"
+          :editing="editingText"
+          @addText="addText(textProperties)"
+          @update="handleTextUpdates"
+        />
       </div>
 
       <div
@@ -87,15 +66,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, shallowRef, useTemplateRef } from "vue";
-import ImageUploader from "~/components/ImageUploader.vue";
+import { computed, ref, useTemplateRef } from "vue";
+import ImageUploader from "~/components/ImageUploader/index.vue";
 import TextEditor from "~/components/Editor.vue";
 import useText from "~/composables/useText";
 import useImage from "~/composables/useImage";
 import type { ImgConfigs, TextConfigs } from "~/types/common";
 import type { FabricImage, FabricText } from "fabric";
 import useCanvas from "~/composables/useCanvas";
-import imageUrl from "~/assets/t-shirt.jpg";
+import Tabs from "~/components/Common/Tabs.vue";
 
 const activeTab = ref<"image" | "text">("image");
 
@@ -109,18 +88,12 @@ const {
   exportAsJson,
   loadAsJson,
 } = useCanvas(canvasRef, {
-  productImageUrl: imageUrl,
-  canvasSize: { width: 550, height: 600 },
-  clipPathSize: { width: 200, height: 300 },
-  movableClipPath: true,
-});
-
-// FIXME: remove this state it serves no purpose other than cleaning up composables calls
-const canvasStates = shallowRef({
-  canvasInstance,
-  designArea,
-  clipPath,
-  activeObj,
+  bgImg: {
+    url: "https://rlv.zcache.co.uk/create_your_own_notebook-rc3a15e21d2a34d75978fc07f918d60b5_ambg4_8byvr_306.jpg",
+  },
+  clipPathOption: {
+    movable: true,
+  },
 });
 
 const textProperties = ref<TextConfigs>({
@@ -134,15 +107,18 @@ const textProperties = ref<TextConfigs>({
   fill: "#000000",
 });
 
-const imageProperties = ref<ImgConfigs>({
-  width: 200,
-  height: 200,
-  opacity: 1,
-  angle: 0,
+const { addText, updateText } = useText({
+  canvasInstance,
+  designArea,
+  clipPath,
+  activeObj,
 });
-
-const { addText, updateText } = useText(canvasStates.value);
-const { addImage, updateImage } = useImage(canvasStates.value);
+const { addImage, updateImage } = useImage({
+  canvasInstance,
+  designArea,
+  clipPath,
+  activeObj,
+});
 
 const editingText = computed(() => activeObj.value?.type === "text");
 const editingImage = computed(() => activeObj.value?.type === "image");
@@ -162,13 +138,16 @@ const activeTextValues = computed((): TextConfigs => {
 });
 
 const activeImageValues = computed(() => {
-  const activeObject = activeObj.value as FabricImage;
-  return {
-    width: activeObject.width,
-    height: activeObject.height,
-    opacity: activeObject.opacity,
-    angle: activeObject.angle,
-  };
+  const imageObj = activeObj.value as FabricImage;
+  if (imageObj && imageObj.type === "image") {
+    return {
+      src: imageObj?.getSrc(),
+      width: imageObj.width,
+      height: imageObj.height,
+      opacity: imageObj.opacity,
+      angle: imageObj.angle,
+    };
+  }
 });
 
 const handleTextUpdates = (key: string, value: string) => {
@@ -182,9 +161,12 @@ const handleTextUpdates = (key: string, value: string) => {
 const handleImageUpdates = (key: string, value: number) => {
   if (editingImage.value) {
     updateImage({ [key]: value } as ImgConfigs);
-  } else {
-    imageProperties.value[key] = value;
   }
+};
+
+const handleImageDelete = () => {
+  if (activeObj.value) canvasInstance.value?.remove(activeObj.value);
+  activeObj.value = null;
 };
 
 const handleExport = () => {
