@@ -28,47 +28,32 @@
 
     <main class="flex justify-center gap-5">
       <div class="toolbar max-w-[590px] grow rounded bg-gray-100 p-4">
-        <div class="flex p-2">
-          <button
-            class="mr-2 px-4 py-2"
-            :class="
-              activeTab === 'image'
-                ? 'border-b-2 border-blue-500 font-bold'
-                : ''
-            "
-            @click="activeTab = 'image'"
-          >
-            Image Upload
-          </button>
-          <button
-            class="px-4 py-2"
-            :class="
-              activeTab === 'text' ? 'border-b-2 border-blue-500 font-bold' : ''
-            "
-            @click="activeTab = 'text'"
-          >
-            Text Editor
-          </button>
-        </div>
+        <Tabs
+          v-model="activeTab"
+          :tabs="[
+            { key: 'image', label: 'Image Upload' },
+            { key: 'text', label: 'Text Editor' },
+          ]"
+        />
 
-        <!-- Tab Content -->
-        <div v-show="activeTab === 'image'" class="tab-panel">
-          <ImageUploader
-            :values="editingImage ? activeImageValues : imageProperties"
-            :editing="editingImage"
-            @image-uploaded="addImage"
-            @update="handleImageUpdates"
-            @delete="handleImageDelete"
-          />
-        </div>
-        <div v-show="activeTab === 'text'" class="tab-panel">
-          <TextEditor
-            :values="editingText ? activeTextValues : textProperties"
-            :editing="editingText"
-            @addText="addText(textProperties)"
-            @update="handleTextUpdates"
-          />
-        </div>
+        <ImageUploader
+          v-show="activeTab === 'image'"
+          class="tab-panel"
+          :values="activeImageValues"
+          :editing="editingImage"
+          @image-uploaded="addImage"
+          @update="handleImageUpdates"
+          @delete="handleImageDelete"
+        />
+
+        <TextEditor
+          v-show="activeTab === 'text'"
+          class="tab-panel"
+          :values="editingText ? activeTextValues : textProperties"
+          :editing="editingText"
+          @addText="addText(textProperties)"
+          @update="handleTextUpdates"
+        />
       </div>
 
       <div
@@ -82,13 +67,14 @@
 
 <script setup lang="ts">
 import { computed, ref, shallowRef, useTemplateRef } from "vue";
-import ImageUploader from "~/components/ImageUploader.vue";
+import ImageUploader from "~/components/ImageUploader/index.vue";
 import TextEditor from "~/components/Editor.vue";
 import useText from "~/composables/useText";
 import useImage from "~/composables/useImage";
 import type { ImgConfigs, TextConfigs } from "~/types/common";
 import type { FabricImage, FabricText } from "fabric";
 import useCanvas from "~/composables/useCanvas";
+import Tabs from "~/components/Common/Tabs.vue";
 
 const activeTab = ref<"image" | "text">("image");
 
@@ -129,13 +115,6 @@ const textProperties = ref<TextConfigs>({
   fill: "#000000",
 });
 
-const imageProperties = ref<ImgConfigs>({
-  width: 200,
-  height: 200,
-  opacity: 1,
-  angle: 0,
-});
-
 const { addText, updateText } = useText(canvasStates.value);
 const { addImage, updateImage } = useImage(canvasStates.value);
 
@@ -158,14 +137,14 @@ const activeTextValues = computed((): TextConfigs => {
 
 const activeImageValues = computed(() => {
   const imageObj = activeObj.value as FabricImage;
-
-  return {
-    src: imageObj.getSrc(),
-    width: imageObj.width,
-    height: imageObj.height,
-    opacity: imageObj.opacity,
-    angle: imageObj.angle,
-  };
+  if (imageObj)
+    return {
+      src: imageObj.getSrc(),
+      width: imageObj.width,
+      height: imageObj.height,
+      opacity: imageObj.opacity,
+      angle: imageObj.angle,
+    };
 });
 
 const handleTextUpdates = (key: string, value: string) => {
@@ -179,8 +158,6 @@ const handleTextUpdates = (key: string, value: string) => {
 const handleImageUpdates = (key: string, value: number) => {
   if (editingImage.value) {
     updateImage({ [key]: value } as ImgConfigs);
-  } else {
-    imageProperties.value[key] = value;
   }
 };
 
