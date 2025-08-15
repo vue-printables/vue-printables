@@ -17,28 +17,28 @@ hero:
       link: https://github.com/vue-printables/vue-printables
 
 features:
-  - icon: 👕
-    title: Print-Ready Design Tools
-    details: Develop intuitive editors for creating designs on physical products like apparel, stationery, stickers, and more.
-  - icon: 🚀
-    title: Boost E-commerce Engagement
-    details: Integrate powerful design capabilities directly into your e-commerce platform, enhancing user experience and product customization.
-  - icon: 🎨
-    title: Canvas & Area Management
-    details: Easily initialize and control Fabric.js canvases, perfect for defining dynamic printable areas and displaying product mockups.
-  - icon: 📏
-    title: High-Resolution Export
-    details: Export designs as high-quality images with dynamic DPI and resolution settings, ensuring professional-grade print output.
-  - icon: ✏️
-    title: Advanced Text Manipulation
-    details: Offer comprehensive text handling with extensive font styling, positioning, and real-time editing for personalized print designs.
+  - icon: 🖌️
+    title: Print-Ready Design
+    details: Create custom T-shirts, mugs, tote bags, phone cases, posters, and more with easy, intuitive design tools.
+  - icon: 🛒
+    title: E-commerce Integration
+    details: Add design tools directly to your store to boost engagement and customization.
+  - icon: ⚡
+    title: TypeScript Ready
+    details: Enjoy full TypeScript support for safer, faster development.
+  - icon: 🖨️
+    title: High-Res Export
+    details: Export sharp, print-quality images with adjustable DPI and resolution.
+  - icon: 📐
+    title: Smart Canvas Control
+    details: Manage Fabric.js canvases for printable areas and realistic product previews.
+  - icon: ✍️
+    title: Rich Text Editing
+    details: Style, position, and update text in real time for personalized designs.
   - icon: 🖼️
-    title: Seamless Image Operations
-    details: Enable users to upload, resize, rotate, and position images with automatic scaling and clipping, ensuring perfect print output.
-  - icon: 💾
-    title: Design Import/Export
-    details: Allow users to easily save and load their designs in JSON format, enabling seamless collaboration and future edits.
-  - icon: 💻
-    title: Full TypeScript Support
-    details: Benefit from complete TypeScript support, providing robust type checking and an enhanced development experience.
+    title: Flexible Image Tools
+    details: Upload, resize, rotate, and clip images for perfect print alignment.
+  - icon: 🔄
+    title: Design Import & Export
+    details: Save and load designs in JSON for easy edits and collaboration.
 ---
