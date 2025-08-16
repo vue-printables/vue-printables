@@ -26,8 +26,10 @@ export type TextConfigs = {
 
 export type ImgConfigs = {
   [key: string]: any;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
+  top?: number;
+  left?: number;
   opacity?: number;
   angle?: number;
 };
