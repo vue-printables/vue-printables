@@ -76,19 +76,6 @@ import { useImage } from "vue-printables";
 import { useCanvas, useText, useImage } from "vue-printables";
 ```
 
-## Vite Configuration
-
-If you're using Vite, you may need to add [Fabric.js](https://fabricjs.com/) to your optimized dependencies:
-
-```js
-// vite.config.js
-export default {
-  optimizeDeps: {
-    include: ["fabric"],
-  },
-};
-```
-
 ## Next Steps
 
 Now that you have Vue Printables installed, you can:

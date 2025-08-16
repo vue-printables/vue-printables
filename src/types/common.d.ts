@@ -26,8 +26,10 @@ export type TextConfigs = {
 
 export type ImgConfigs = {
   [key: string]: any;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
+  top?: number;
+  left?: number;
   opacity?: number;
   angle?: number;
 };
@@ -39,10 +41,17 @@ export type CanvasTemplateRef = {
   activeObj: Ref<FabricObject | null>;
 };
 
-export interface CanvasEditorOptions {
-  productImageUrl: string;
-  canvasSize?: Size;
-  clipPathSize?: Size;
-  clipPathPos?: Position;
-  movableClipPath?: boolean;
+export interface CanvasOptions {
+  initOnMount?: boolean;
+  size?: Size;
+  clipPathOption?: {
+    size?: Size;
+    position?: Position;
+    movable?: boolean;
+  };
+  bgImg?: {
+    url: string;
+    position?: Position;
+    size?: Size;
+  };
 }

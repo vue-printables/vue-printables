@@ -4,7 +4,7 @@ import { centerRelativeTo } from "~/utils/fabric";
 import { renderDeleteControl } from "~/utils/fabricHelpers";
 
 export default function useImage(canvasRef: CanvasTemplateRef) {
-  const addImage = (imgElement: HTMLImageElement) => {
+  const addImage = async (url: string, options?: ImgConfigs) => {
     if (
       !canvasRef.canvasInstance.value ||
       !canvasRef.designArea.value ||
@@ -12,16 +12,27 @@ export default function useImage(canvasRef: CanvasTemplateRef) {
     )
       return;
 
-    const image = new FabricImage(imgElement, {
-      clipPath: canvasRef.clipPath.value,
-    });
+    const image = await FabricImage.fromURL(url);
+
+    const width = options?.width ?? canvasRef.designArea.value.getScaledWidth();
+    const height =
+      options?.height ?? canvasRef.designArea.value.getScaledHeight();
 
     const scale = Math.min(
-      (canvasRef.designArea.value.getScaledWidth() * 0.8) / image.width,
-      (canvasRef.designArea.value.getScaledHeight() * 0.8) / image.height,
+      (width * 0.8) / image.width,
+      (height * 0.8) / image.height,
     );
 
-    image.set({ scaleX: scale, scaleY: scale });
+    image.set({
+      clipPath: canvasRef.clipPath.value,
+      top: options?.top,
+      left: options?.left,
+      scaleX: scale,
+      scaleY: scale,
+    });
+
+    if (!options?.left && !options?.top)
+      centerRelativeTo(image, canvasRef.designArea.value);
 
     image.controls.dd = new Control({
       x: 0.5,
@@ -35,7 +46,6 @@ export default function useImage(canvasRef: CanvasTemplateRef) {
       },
     });
 
-    centerRelativeTo(image, canvasRef.designArea.value);
     canvasRef.canvasInstance.value.add(image);
     canvasRef.canvasInstance.value.setActiveObject(image);
     canvasRef.activeObj.value = image;
@@ -46,6 +56,7 @@ export default function useImage(canvasRef: CanvasTemplateRef) {
     const activeObj = canvasRef.activeObj.value;
     if (activeObj && activeObj?.type === "image") {
       activeObj.set(imgConfig);
+      activeObj.setCoords();
       canvasRef.canvasInstance.value?.requestRenderAll();
     } else {
       if (activeObj && activeObj?.type !== "image") {

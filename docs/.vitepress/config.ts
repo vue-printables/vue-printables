@@ -69,13 +69,6 @@ export default defineConfig({
       },
     ],
   ],
-  vite: {
-    resolve: {
-      alias: {
-        "~": path.join(process.cwd(), "/src"),
-      },
-    },
-  },
   appearance: "force-dark",
   themeConfig: {
     search: { provider: "local" },
@@ -124,6 +117,13 @@ export default defineConfig({
     footer: {
       message: "Released under the MIT License.",
       copyright: "Copyright © 2025 vue-printables",
+    },
+  },
+  vite: {
+    resolve: {
+      alias: {
+        "~": path.join(process.cwd(), "/src"),
+      },
     },
   },
 });
