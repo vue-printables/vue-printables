@@ -1,71 +1,65 @@
 # Introduction
 
-## What is Vue Printables?
+Vue Printables is a set of Vue 3 composables and utilities for building **print-ready design editors** using [Fabric.js](http://fabricjs.com/). It’s perfect for creating T-shirt designers, custom mug editors, poster creators, and more — all inside your Vue app.
 
-Vue Printables is a powerful Vue.js library that leverages Fabric.js to create interactive canvas-based design tools. It provides three essential composables that make building custom product designers, image editors, and creative tools effortless.
+## Features
 
-The library is built with Vue 3's Composition API and provides full TypeScript support, making it perfect for modern Vue applications that need canvas-based design functionality.
+With Vue Printables, you can:
 
-## Key Features
+- Initialize and control canvases
+- Define dynamic design areas with optional clip paths
+- Add, edit, and delete text and images
+- Import/export designs as JSON
+- Export high-resolution, print-ready images
 
-### 🎨 Canvas Management
-- Initialize Fabric.js canvas with ease
-- Background image handling
-- Configurable design areas with clipping
-- Automatic scaling and positioning
+## Quick Start
 
-### 📝 Text Operations
-- Add and edit text elements
-- Full typography control (font, size, weight, style)
-- Real-time text updates
-- Custom styling options
+Here’s a minimal example showing how to set up a canvas with a clip path:
 
-### 🖼️ Image Handling
-- Image upload and positioning
-- Automatic scaling to fit design areas
-- Rotation and transformation controls
-- Clipping path support
+```vue
+<template>
+  <div class="canvas-wrapper">
+    <canvas ref="mainCanvas" />
+  </div>
+</template>
 
-## Why Choose Vue Printables?
+<script setup lang="ts">
+import { onMounted, useTemplateRef } from "vue";
+import { useCanvas, useImage } from "vue-printables";
 
-### Developer Experience
-- **Vue 3 Native**: Built specifically for Vue 3 with Composition API
-- **TypeScript Ready**: Full type safety and excellent IntelliSense
-- **Minimal Setup**: Get started with just a few lines of code
-- **Composable Architecture**: Modular design for maximum flexibility
+const canvasRef = useTemplateRef("mainCanvas");
 
-### Production Ready
-- **Performance Optimized**: Efficient canvas operations and memory management
-- **Cross-browser Compatible**: Works on all modern browsers
-- **Responsive Design**: Adapts to different screen sizes
-- **Extensible**: Easy to customize and extend functionality
+const { canvasInstance, designArea, clipPath, activeObj, initCanvas } =
+  useCanvas(canvasRef, {
+    bgImg: {
+      url: "/product.png",
+    },
+  });
 
-### Use Cases
-- **E-commerce Product Customization**: T-shirts, mugs, phone cases
-- **Print Design Tools**: Business cards, flyers, posters
-- **Photo Editing Applications**: Basic image manipulation
-- **Creative Platforms**: Art tools and design interfaces
+const { addImage } = useImage({
+  canvasInstance,
+  designArea,
+  clipPath,
+  activeObj,
+});
 
-## Architecture
+onMounted(async () => {
+  await initCanvas();
+  addImage("/logo.png");
+});
+</script>
 
-Vue Printables follows a composable-first architecture:
-
-```
-useCanvas (Core)
-├── Canvas initialization
-├── Background image management
-├── Design area control
-└── Object selection handling
-
-useText (Text Operations)
-├── Text creation and editing
-├── Typography controls
-└── Style management
-
-useImage (Image Operations)
-├── Image upload handling
-├── Scaling and positioning
-└── Transformation controls
+<style>
+.canvas-wrapper {
+  position: relative;
+  width: 600px;
+  height: 600px;
+}
+</style>
 ```
 
-Each composable is designed to work independently or together, giving you the flexibility to use only what you need for your specific use case.
+<script setup lang="ts">
+import Introduction from "../code/Introduction.vue"
+</script>
+
+<Introduction/>
