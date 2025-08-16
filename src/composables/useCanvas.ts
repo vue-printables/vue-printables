@@ -34,7 +34,7 @@ export default function useCanvas(
     },
   } = options;
 
-  onMounted(async () => {
+  const initCanvas = async () => {
     if (!canvasRef.value) {
       throw new Error("Canvas element ref is not available");
     }
@@ -165,7 +165,7 @@ export default function useCanvas(
     } catch (error) {
       throw new Error(`Failed to initialize canvas: ${error}`);
     }
-  });
+  };
 
   const exportAsImg = async (
     size: Size,
@@ -334,6 +334,8 @@ export default function useCanvas(
     canvasInstance.value?.renderAll();
   };
 
+  onMounted(() => options.initOnMount && initCanvas());
+
   onUnmounted(async () => {
     canvasInstance.value?.dispose();
     canvasInstance.value = null;
@@ -347,6 +349,7 @@ export default function useCanvas(
     designArea,
     clipPath,
     activeObj,
+    initCanvas,
     exportAsImg,
     exportAsJson,
     loadAsJson,

@@ -40,6 +40,7 @@ export type CanvasTemplateRef = {
 };
 
 export interface CanvasOptions {
+  initOnMount?: boolean;
   size?: Size;
   clipPathOption?: {
     size?: Size;
