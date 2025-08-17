@@ -89,9 +89,9 @@ export default defineConfig({
       {
         text: "Composables",
         items: [
-          { text: "useCanvas", link: "/guide/useCanvas" },
-          { text: "useText", link: "/guide/useText" },
-          { text: "useImage", link: "/guide/useImage" },
+          { text: "useCanvas()", link: "/guide/useCanvas" },
+          { text: "useText()", link: "/guide/useText" },
+          { text: "useImage()", link: "/guide/useImage" },
         ],
       },
       {

@@ -1,14 +1,17 @@
 # Vue Printables
 
-A powerful Vue.js library that leverages Fabric.js to make custom product design and customization effortless. Vue Printables provides three essential composables for building interactive canvas-based design tools.
+Vue Printables is a set of Vue 3 composables and utilities for building **print-ready design editors** using [Fabric.js](http://fabricjs.com/). It’s perfect for creating T-shirt designers, custom mug editors, poster creators, and more — all inside your Vue app.
 
 ## Features
 
-- 🎨 **Canvas Management** - Easy canvas initialization and control
-- 📝 **Text Manipulation** - Add, edit, and style text elements
-- 🖼️ **Image Handling** - Upload, resize, and position images
-- 🎯 **Design Area Control** - Configurable printable areas with clipping
-- 🔧 **TypeScript Support** - Full type safety and IntelliSense
+With Vue Printables, you can:
+
+- **Canvas Management** - Initialize and control canvases
+- **Design Area Control** - Define dynamic design areas with optional clip paths
+- **Text Manipulation** - Add, edit, and style text elements
+- **Image Handling** - Upload, resize, and position images
+- **JSON Support** - Import/export designs as JSON
+- **Image Exporting** - Export high-resolution, print-ready images
 
 ## Quick Start
 
@@ -26,49 +29,68 @@ bun install vue-printables
 
 ```vue
 <template>
-  <canvas ref="canvasRef" />
+  <div class="canvas-wrapper">
+    <canvas ref="mainCanvas" />
+  </div>
 </template>
 
-<script setup>
-import { useTemplateRef } from "vue";
-import { useCanvas, useText, useImage } from "vue-printables";
+<script setup lang="ts">
+import { onMounted, useTemplateRef } from "vue";
+import { useCanvas, useImage } from "vue-printables";
 
-const canvasRef = useTemplateRef("canvasRef");
+const canvasRef = useTemplateRef("mainCanvas");
 
-// Initialize canvas
-const { canvasInstance, activeObj } = useCanvas(canvasRef, {
-  productImageUrl: "/path/to/product.jpg",
-  canvasSize: { width: 550, height: 600 },
-  clipPathSize: { width: 200, height: 300 },
+const { canvasInstance, designArea, clipPath, activeObj, initCanvas } =
+  useCanvas(canvasRef, {
+    bgImg: {
+      url: "/product.png",
+    },
+  });
+
+const { addImage } = useImage({
+  canvasInstance,
+  designArea,
+  clipPath,
+  activeObj,
 });
 
-// Text operations
-const { addText, updateText } = useText({ canvasInstance, activeObj });
-
-// Image operations
-const { addImage, updateImage } = useImage({ canvasInstance, activeObj });
+onMounted(async () => {
+  await initCanvas();
+  addImage("/logo.png");
+});
 </script>
+
+<style>
+.canvas-wrapper {
+  position: relative;
+  width: 600px;
+  height: 600px;
+}
+</style>
 ```
+
+### Demo
+
+![demo.gif](./demo.gif)
 
 ## Core Composables
 
-### useCanvas
+### `useCanvas()`
 
-Manages the main Fabric.js canvas, background images, and design areas.
+Manages the main [Fabric.js](http://fabricjs.com/) canvas, background images, and design areas.
 
-### useText
+### `useText()`
 
 Handles text element creation, editing, and styling with full typography control.
 
-### useImage
+### `useImage()`
 
 Manages image uploads, positioning, scaling, and transformations.
 
 ## Requirements
 
 - Vue 3.0+
-- TypeScript (recommended)
-- Modern browser with Canvas support
+- [Fabric.js](http://fabricjs.com/) 6.0+
 
 ## License
 
