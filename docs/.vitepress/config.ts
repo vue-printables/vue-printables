@@ -97,6 +97,7 @@ export default defineConfig({
       {
         text: "Examples",
         items: [
+          { text: "Front/Back Product", link: "/examples/frontBackProduct" },
           { text: "Printable Area", link: "/examples/printableArea" },
           { text: "Multiple Instances", link: "/examples/multiInstances" },
         ],

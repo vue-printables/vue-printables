@@ -41,7 +41,7 @@ onMounted(async () => {
 });
 </script>
 
-<style>
+<style scoped>
 .canvas-wrapper {
   display: flex;
   justify-content: center;
