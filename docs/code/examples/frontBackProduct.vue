@@ -1,62 +1,38 @@
 <template>
   <div class="container">
     <div class="controls">
-      <div style="display: flex; align-items: center; gap: 8px">
-        <button
-          class="actions"
-          @click="
-            isBackSide
-              ? backCanvasImage.addImage(logoSrc, {
-                  width: 200,
-                  height: 200,
-                })
-              : frontCanvasImage.addImage(logoSrc, {
-                  width: 200,
-                  height: 200,
-                })
-          "
-        >
-          Add Image
-        </button>
-        <button
-          class="actions"
-          @click="
-            isBackSide
-              ? backCanvasText.addText(textProperties)
-              : frontCanvasText.addText(textProperties)
-          "
-        >
-          Add Text
-        </button>
+      <div class="actions-container">
+        <button class="actions" @click="handleAddImage">Add Image</button>
+        <button class="actions" @click="handleAddText">Add Text</button>
       </div>
 
       <div class="toggle-wrapper">
         <span class="label">Front</span>
         <label class="switch">
-          <input v-model="isBackSide" type="checkbox" class="switch-input" />
+          <input
+            v-model="isBackSide"
+            type="checkbox"
+            class="switch-input"
+            @change="handleChangeSide"
+          />
           <div class="switch-slider"></div>
         </label>
         <span class="label">Back</span>
       </div>
     </div>
 
-    <div v-show="!isBackSide" class="canvas-wrapper">
-      <canvas ref="frontCanvas" />
-    </div>
-
-    <div v-show="isBackSide" class="canvas-wrapper">
-      <canvas ref="backCanvas" />
+    <div class="canvas-wrapper">
+      <canvas ref="mainCanvas" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, useTemplateRef } from "vue";
+import { onMounted, ref, shallowRef, useTemplateRef } from "vue";
 import useText from "~/composables/useText";
 import useImage from "~/composables/useImage";
 import useCanvas from "~/composables/useCanvas";
 import logoSrc from "../../assets/hulk.png";
-import type { TextConfigs } from "~/types/common";
 
 const frontImage =
   "https://ih1.redbubble.net/image.660499737.3682/sn,x600-pad,600x600,f8f8f8.jpg";
@@ -64,28 +40,18 @@ const backImage =
   "https://img.thecdn.in/63984/61b6XtR08NL_SL1100_-1741341527201.jpeg?width=600&format=webp";
 
 const isBackSide = ref(false);
-
-const frontCanvasRef = useTemplateRef("frontCanvas");
-const backCanvasRef = useTemplateRef("backCanvas");
-
-const textProperties = ref<TextConfigs>({
-  fontFamily: "Arial",
-  fontSize: 24,
-  fontWeight: "normal",
-  fontStyle: "normal",
-  stroke: "",
-  text: "Example Text",
-  underline: false,
-  fill: "green",
-});
+const inactiveCanvasJson = shallowRef();
+const canvasRef = useTemplateRef("mainCanvas");
 
 const {
-  activeObj: frontActiveObj,
-  canvasInstance: frontCanvasInstance,
-  clipPath: frontClipPath,
-  designArea: frontDesignArea,
-} = useCanvas(frontCanvasRef, {
-  initOnMount: true,
+  activeObj,
+  canvasInstance,
+  clipPath,
+  designArea,
+  initCanvas,
+  loadAsJson,
+  updateBgImage,
+} = useCanvas(canvasRef, {
   bgImg: {
     url: frontImage,
   },
@@ -95,49 +61,58 @@ const {
   size: { height: 400, width: 400 },
 });
 
-const {
-  activeObj: backActiveObj,
-  canvasInstance: backCanvasInstance,
-  clipPath: backClipPath,
-  designArea: backDesignArea,
-} = useCanvas(backCanvasRef, {
-  initOnMount: true,
-  bgImg: {
-    url: backImage,
-  },
-  clipPathOption: {
-    movable: true,
-  },
-  size: { height: 400, width: 400 },
+const { addText } = useText({
+  canvasInstance,
+  designArea,
+  clipPath,
+  activeObj,
 });
 
-const frontCanvasText = useText({
-  canvasInstance: frontCanvasInstance,
-  designArea: frontDesignArea,
-  clipPath: frontClipPath,
-  activeObj: frontActiveObj,
+const { addImage } = useImage({
+  canvasInstance,
+  designArea,
+  clipPath,
+  activeObj,
 });
 
-const backCanvasText = useText({
-  canvasInstance: backCanvasInstance,
-  designArea: backDesignArea,
-  clipPath: backClipPath,
-  activeObj: backActiveObj,
+const handleChangeSide = async () => {
+  if (!canvasInstance.value) return;
+
+  const activeCanvasJson = canvasInstance.value?.toJSON();
+  await loadAsJson(inactiveCanvasJson.value);
+  inactiveCanvasJson.value = { ...activeCanvasJson };
+
+  if (
+    canvasInstance.value.toJSON().backgroundImage.src ===
+    inactiveCanvasJson.value.backgroundImage.src
+  ) {
+    await updateBgImage({ url: isBackSide.value ? backImage : frontImage });
+  }
+};
+
+onMounted(async () => {
+  await initCanvas();
+  inactiveCanvasJson.value = canvasInstance.value?.toJSON();
 });
 
-const frontCanvasImage = useImage({
-  canvasInstance: frontCanvasInstance,
-  designArea: frontDesignArea,
-  clipPath: frontClipPath,
-  activeObj: frontActiveObj,
-});
+const handleAddImage = () => {
+  addImage(logoSrc, {
+    width: 200,
+    height: 200,
+  });
+};
 
-const backCanvasImage = useImage({
-  canvasInstance: backCanvasInstance,
-  designArea: backDesignArea,
-  clipPath: backClipPath,
-  activeObj: backActiveObj,
-});
+const handleAddText = () => {
+  addText({
+    fontFamily: "Arial",
+    fontSize: 24,
+    fontWeight: "normal",
+    fontStyle: "normal",
+    text: "Example Text",
+    underline: false,
+    fill: "green",
+  });
+};
 </script>
 
 <style scoped>
@@ -211,6 +186,12 @@ const backCanvasImage = useImage({
 .switch-input:checked + .switch-slider::after {
   transform: translateX(20px);
   border-color: white;
+}
+
+.actions-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .actions {
