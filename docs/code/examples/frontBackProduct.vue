@@ -1,11 +1,13 @@
 <template>
   <div class="container">
+    <!-- Toggle Controls -->
     <div class="controls">
       <div class="actions-container">
         <button class="actions" @click="handleAddImage">Add Image</button>
         <button class="actions" @click="handleAddText">Add Text</button>
       </div>
 
+      <!-- Front/Back Toggle -->
       <div class="toggle-wrapper">
         <span class="label">Front</span>
         <label class="switch">
@@ -21,6 +23,7 @@
       </div>
     </div>
 
+    <!-- Canvas Area -->
     <div class="canvas-wrapper">
       <canvas ref="mainCanvas" />
     </div>
@@ -78,10 +81,16 @@ const { addImage } = useImage({
 const handleChangeSide = async () => {
   if (!canvasInstance.value) return;
 
+  // Save current canvas state
   const activeCanvasJson = canvasInstance.value?.toJSON();
+
+  // Load inactive side
   await loadAsJson(inactiveCanvasJson.value);
+
+  // Store previous active state
   inactiveCanvasJson.value = { ...activeCanvasJson };
 
+  // Update background image if needed
   if (
     canvasInstance.value.toJSON().backgroundImage.src ===
     inactiveCanvasJson.value.backgroundImage.src
