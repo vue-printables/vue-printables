@@ -111,7 +111,7 @@ The composable returns an object with the following properties:
 - **Type**: `() => Promise<void>`
 - **Description**: Initializes the Fabric.js canvas instance with the configured options. Sets up the background image, design area, and clip path based on the provided options. Must be called before any canvas operations can be performed.
 
-### `exportAsImg()`
+### `exportAsImg(size, designOption?, format?)`
 
 - **Type**: `(size: Size, designOption?: {size?: Size; position?: Position; dpi?: number;}, format?: ImageFormat) => Promise<string | undefined>`
 - **Description**: Export the desired design area as an image.
@@ -121,7 +121,12 @@ The composable returns an object with the following properties:
 - **Type**: `() => any`
 - **Description**: Export the designed canvas as a JSON file.
 
-### `loadAsJson()`
+### `loadAsJson(canvasJson)`
 
 - **Type**: `(canvasJson: any) => Promise<void>`
 - **Description**: Restores a previously exported canvas state from JSON data. Recreates all canvas objects and their properties exactly as they were when exported.
+
+### `updateBgImage(bgImg)`
+
+- **Type**: `(bgImg?: {url: string; position?: Position; size?: Size;}) => Promise<void>`
+- **Description**: Updates or sets the background image of the canvas. Can be used to change the product image dynamically after canvas initialization.

@@ -5,10 +5,10 @@ This example demonstrates how to create a product designer with front and back v
 ## Demo
 
 <script setup lang="ts">
-import frontBackProduct from "../code/examples/frontBackProduct.vue"
+import FrontBackProduct from "../code/examples/FrontBackProduct.vue"
 </script>
 
-<frontBackProduct />
+<FrontBackProduct />
 
 ## Usage
 
