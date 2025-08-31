@@ -101,7 +101,7 @@ export default defineConfig({
             text: "Front/Back Product Design",
             link: "/examples/frontBackProduct",
           },
-          { text: "Printable Area", link: "/examples/printableArea" },
+          { text: "Full Editor", link: "/examples/fullEditor" },
           { text: "Multiple Instances", link: "/examples/multiInstances" },
         ],
       },
