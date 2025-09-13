@@ -50,7 +50,7 @@ import FullEditor from "../code/examples/FullEditor.vue"
       <!-- Tools Sidebar -->
       <aside class="editor-sidebar">
         <Tabs v-model="activeTab" :tabs="tabs" />
-        
+
         <ImageUploader
           v-show="activeTab === 'image'"
           :values="activeImageValues"
@@ -58,7 +58,7 @@ import FullEditor from "../code/examples/FullEditor.vue"
           @image-uploaded="addImage"
           @update="handleImageUpdates"
         />
-        
+
         <TextEditor
           v-show="activeTab === 'text'"
           :values="editingText ? activeTextValues : textProperties"
@@ -150,12 +150,12 @@ const handleExport = () => {
   const jsonString = JSON.stringify(canvasJson, null, 2);
   const blob = new Blob([jsonString], { type: "application/json" });
   const url = URL.createObjectURL(blob);
-  
+
   const link = document.createElement("a");
   link.href = url;
   link.download = `design-${Date.now()}.json`;
   link.click();
-  
+
   URL.revokeObjectURL(url);
 };
 
@@ -163,7 +163,7 @@ const handleImport = () => {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = ".json";
-  
+
   input.onchange = (event) => {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
@@ -175,9 +175,9 @@ const handleImport = () => {
       reader.readAsText(file);
     }
   };
-  
+
   input.click();
 };
 ```
 
-Check the [Source](https://github.com/ahmedd-mahmoud/custom-design-printables/blob/main/docs/code/examples/FullEditor.vue) file for full code preview.
+Check the [Source](https://github.com/vue-printables/vue-printables/blob/main/docs/code/examples/FullEditor.vue) file for full code preview.

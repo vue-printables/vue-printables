@@ -105,4 +105,4 @@ const {
 });
 ```
 
-Check the [Source](https://github.com/ahmedd-mahmoud/custom-design-printables/blob/main/docs/code/examples/frontBackProduct.vue) file for full code preview.
+Check the [Source](https://github.com/vue-printables/vue-printables/blob/main/docs/code/examples/FrontBackProduct.vue) file for full code preview.

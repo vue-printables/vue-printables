@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "custom-design-printables",
+      "name": "vue-printables",
       "dependencies": {
         "changedpi": "^1.0.4",
         "fabric": "^6.6.1",

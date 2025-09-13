@@ -53,10 +53,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ahmedd-mahmoud/custom-design-printables.git"
+    "url": "git+https://github.com/vue-printables/vue-printables"
   },
   "bugs": {
-    "url": "https://github.com/ahmedd-mahmoud/custom-design-printables/issues"
+    "url": "https://github.com/vue-printables/vue-printables/issues"
   },
   "homepage": "https://vue-printables.vuedoo.org",
   "module": "./dist/index.es.js",
