@@ -13,6 +13,14 @@ on:
         description: "Branch to release from"
         default: "main"
         type: string
+      version:
+        description: "Version Type"
+        default: "patch"
+        type: choice
+        options:
+          - "patch"
+          - "minor"
+          - "major"
 
 permissions:
   contents: write
@@ -41,7 +49,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.2.13
+          bun-version: 1.2.21
 
       - name: Install dependencies
         run: bun install
@@ -55,9 +63,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
-          DRY_RUN: false
-          PRERELEASE: false
-          DEFAULT_BUMP: patch
+          DEFAULT_BUMP: ${{ github.event.inputs.version}}
           BRANCH_HISTORY: last
 
       - run: echo "previous_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo '')" >> $GITHUB_ENV
