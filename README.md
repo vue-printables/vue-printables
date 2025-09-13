@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="Docs Hero Section" src="public/favicon.ico" />
+</p>
+
 # Vue Printables
 
 Vue Printables is a set of Vue 3 composables and utilities for building **print-ready design editors** using [Fabric.js](http://fabricjs.com/). It’s perfect for creating T-shirt designers, custom mug editors, poster creators, and more — all inside your Vue app.
