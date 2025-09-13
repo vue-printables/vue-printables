@@ -67,12 +67,12 @@
 
 <script setup lang="ts">
 import { computed, ref, useTemplateRef } from "vue";
+import type { ImgConfigs, TextConfigs } from "~/types/common";
+import type { FabricImage, FabricText } from "fabric";
 import ImageUploader from "~/components/ImageUploader/index.vue";
 import TextEditor from "~/components/Editor.vue";
 import useText from "~/composables/useText";
 import useImage from "~/composables/useImage";
-import type { ImgConfigs, TextConfigs } from "~/types/common";
-import type { FabricImage, FabricText } from "fabric";
 import useCanvas from "~/composables/useCanvas";
 import Tabs from "~/components/Common/Tabs.vue";
 
@@ -88,6 +88,7 @@ const {
   exportAsJson,
   loadAsJson,
 } = useCanvas(canvasRef, {
+  initOnMount: true,
   bgImg: {
     url: "https://rlv.zcache.co.uk/create_your_own_notebook-rc3a15e21d2a34d75978fc07f918d60b5_ambg4_8byvr_306.jpg",
   },

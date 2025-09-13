@@ -34,7 +34,7 @@ export default function useCanvas(
     },
   } = options;
 
-  onMounted(async () => {
+  const initCanvas = async () => {
     if (!canvasRef.value) {
       throw new Error("Canvas element ref is not available");
     }
@@ -64,28 +64,7 @@ export default function useCanvas(
         enableRetinaScaling: true,
       });
 
-      if (bgImg) {
-        // Load and add the product image as a background image
-        const productImage = await FabricImage.fromURL(bgImg.url);
-
-        const imageScale = bgImg.size
-          ? 1
-          : Math.min(
-              (size?.width ?? 1) / (productImage.width ?? 1),
-              (size?.height ?? 1) / (productImage.height ?? 1),
-            );
-
-        productImage.set({
-          ...bgImg.size,
-          ...bgImg.position,
-          scaleX: imageScale,
-          scaleY: imageScale,
-          selectable: false,
-          evented: false,
-        });
-
-        canvasInstance.value.backgroundImage = productImage;
-      }
+      await updateBgImage(bgImg);
 
       const clipPathSize = clipPathOption?.size ?? {
         width: size.width - 6,
@@ -99,7 +78,7 @@ export default function useCanvas(
         fill: "transparent",
         stroke: "#ff6600",
         strokeWidth: 3,
-        selectable: clipPathOption?.movable,
+        selectable: clipPathOption?.movable ?? true,
         evented: true,
         hasControls: true,
         strokeUniform: true,
@@ -165,7 +144,7 @@ export default function useCanvas(
     } catch (error) {
       throw new Error(`Failed to initialize canvas: ${error}`);
     }
-  });
+  };
 
   const exportAsImg = async (
     size: Size,
@@ -188,6 +167,7 @@ export default function useCanvas(
     const outputCanvas = new Canvas("", {
       width: size.width,
       height: size.height,
+      backgroundColor: "white",
     });
 
     const centerClipPathPos = {
@@ -334,6 +314,40 @@ export default function useCanvas(
     canvasInstance.value?.renderAll();
   };
 
+  const updateBgImage = async (bgImg?: {
+    url: string;
+    position?: Position;
+    size?: Size;
+  }) => {
+    if (!canvasInstance.value) return;
+
+    if (bgImg) {
+      // Load and add the product image as a background image
+      const productImage = await FabricImage.fromURL(bgImg.url);
+
+      const imageScale = bgImg.size
+        ? 1
+        : Math.min(
+            (size?.width ?? 1) / (productImage.width ?? 1),
+            (size?.height ?? 1) / (productImage.height ?? 1),
+          );
+
+      productImage.set({
+        ...bgImg.size,
+        ...bgImg.position,
+        scaleX: imageScale,
+        scaleY: imageScale,
+        selectable: false,
+        evented: false,
+      });
+
+      canvasInstance.value.backgroundImage = productImage;
+      canvasInstance.value.requestRenderAll();
+    }
+  };
+
+  onMounted(() => options.initOnMount && initCanvas());
+
   onUnmounted(async () => {
     canvasInstance.value?.dispose();
     canvasInstance.value = null;
@@ -347,8 +361,10 @@ export default function useCanvas(
     designArea,
     clipPath,
     activeObj,
+    initCanvas,
     exportAsImg,
     exportAsJson,
     loadAsJson,
+    updateBgImage,
   };
 }

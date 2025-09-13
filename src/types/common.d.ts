@@ -13,7 +13,7 @@ export type Position = {
 };
 
 export type TextConfigs = {
-  [key: string];
+  [key: string]: any;
   text: string;
   fontFamily: string;
   fontSize: number;
@@ -25,9 +25,11 @@ export type TextConfigs = {
 };
 
 export type ImgConfigs = {
-  [key: string];
-  width: number;
-  height: number;
+  [key: string]: any;
+  width?: number;
+  height?: number;
+  top?: number;
+  left?: number;
   opacity?: number;
   angle?: number;
 };
@@ -40,6 +42,7 @@ export type CanvasTemplateRef = {
 };
 
 export interface CanvasOptions {
+  initOnMount?: boolean;
   size?: Size;
   clipPathOption?: {
     size?: Size;
