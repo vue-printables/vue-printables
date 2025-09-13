@@ -83,4 +83,4 @@ Now that you have Vue Printables installed, you can:
 1. Learn about the [useCanvas composable](/guide/useCanvas) for canvas management
 2. Explore [useText composable](/guide/useText) for text operations
 3. Discover [useImage composable](/guide/useImage) for image handling
-4. Check out [practical examples](/examples) to see Vue Printables in action
+4. Check out practical examples to see Vue Printables in action

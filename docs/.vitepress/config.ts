@@ -102,7 +102,7 @@ export default defineConfig({
             link: "/examples/frontBackProduct",
           },
           { text: "Full Editor", link: "/examples/fullEditor" },
-          { text: "Multiple Instances", link: "/examples/multiInstances" },
+          // { text: "Multiple Instances", link: "/examples/multiInstances" },
         ],
       },
     ],
