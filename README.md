@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Docs Hero Section" src="public/favicon.ico" />
+  <img alt="Docs Hero Section" src="public/hero.png" />
 </p>
 
 # Vue Printables
